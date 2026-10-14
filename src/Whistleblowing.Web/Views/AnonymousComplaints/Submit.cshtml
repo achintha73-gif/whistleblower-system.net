@@ -1,0 +1,73 @@
+﻿@model Whistleblowing.Application.DTOs.SubmitAnonymousComplaintDto
+@{
+    ViewData["Title"] = "Submit Anonymously";
+}
+
+<div class="min-h-screen py-10 px-4">
+    <div class="mx-auto max-w-2xl">
+        <a href="/Account/Login" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Back to login
+        </a>
+
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Submit a Complaint Anonymously</h1>
+            <p class="mt-1 text-sm text-gray-600">Your identity will not be recorded anywhere in the system.</p>
+        </div>
+
+        <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+            <form asp-action="Submit" method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+
+                <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
+                            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-blue-900">Anonymous Submission</h2>
+                            <p class="mt-1 text-xs text-blue-800">Your identity will not be recorded. After submitting, you will receive a reference code to track your complaint.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700"></div>
+
+                <div>
+                    <label asp-for="Title" class="mb-1.5 block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
+                    <input asp-for="Title" maxlength="200" placeholder="Brief summary of the issue" class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                    <span asp-validation-for="Title" class="mt-1 block text-xs text-red-600"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Category" class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
+                    <select asp-for="Category" class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="">Select a category (optional)</option>
+                        @foreach (var cat in Whistleblowing.Application.DTOs.ComplaintCategories.All)
+                        {
+                            <option value="@cat">@cat</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="Description" class="mb-1.5 block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+                    <textarea asp-for="Description" rows="8" maxlength="5000" placeholder="Provide details about what happened, when, where, and any other relevant information. Avoid including details that could identify you." class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+                    <span asp-validation-for="Description" class="mt-1 block text-xs text-red-600"></span>
+                </div>
+
+                <div class="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5">
+                    <p class="text-xs text-amber-800"><strong>Important:</strong> Save your reference code after submitting. You'll need it to track your complaint status or add additional information later.</p>
+                </div>
+
+                <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition">
+                    Submit Complaint Anonymously
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

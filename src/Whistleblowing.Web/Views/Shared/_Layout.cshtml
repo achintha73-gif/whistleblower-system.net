@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Whistleblowing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-gray-100">
+    <div class="pointer-events-none fixed -top-40 -right-40 h-96 w-96 rounded-full bg-purple-300/30 blur-3xl"></div>
+    <div class="pointer-events-none fixed -bottom-40 -left-40 h-96 w-96 rounded-full bg-blue-300/30 blur-3xl"></div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- Top header -->
+        <header class="sticky top-0 z-30 border-b border-white/60 bg-white/40 backdrop-blur-xl">
+            <div class="flex items-center justify-between px-6 py-3">
+                <a asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-2.5">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-500/30">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <span class="text-lg font-semibold text-gray-900">Whistleblowing System</span>
+                </a>
+
+                <div class="flex items-center gap-3">
+                    <a asp-controller="Notifications" asp-action="Index"
+                       class="relative inline-flex items-center justify-center rounded-xl border border-white/60 bg-white/60 p-2 text-gray-600 backdrop-blur-sm transition hover:bg-white hover:text-gray-900">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        @await Component.InvokeAsync("NotificationBadge")
+                    </a>
+                    <span class="hidden sm:inline text-sm text-gray-600">@User.Identity?.Name</span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="rounded-xl border border-white/60 bg-white/60 px-3.5 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm transition hover:bg-white">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <!-- Body: sidebar + main -->
+        <div class="relative z-10 flex min-h-[calc(100vh-120px)]">
+            @await Html.PartialAsync("_Sidebar")
+            <main class="flex-1 overflow-auto p-6">
+                <div class="mx-auto max-w-7xl">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    }
+    else
+    {
+        <main class="relative z-10">@RenderBody()</main>
+    }
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/60 bg-white/40 px-6 py-3 text-xs text-gray-600 backdrop-blur-xl">
+        Whistleblowing Management System &copy; @DateTime.Now.Year
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

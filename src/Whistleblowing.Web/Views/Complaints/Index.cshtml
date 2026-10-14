@@ -1,0 +1,105 @@
+@using Whistleblowing.Application.DTOs
+@using Whistleblowing.Domain.Enums
+@model IReadOnlyList<ComplaintDto>
+@{
+    ViewData["Title"] = ViewBag.PageTitle as string ?? "Concerns";
+    var canSubmit = (bool)(ViewBag.CanSubmit ?? false);
+    var isStaff = (bool)(ViewBag.IsManager ?? false) || (bool)(ViewBag.IsAdmin ?? false);
+    string StatusBadge(ComplaintStatus status) => status switch
+    {
+        ComplaintStatus.Pending => "bg-amber-100 text-amber-800 border-amber-200",
+        ComplaintStatus.UnderReview => "bg-blue-100 text-blue-800 border-blue-200",
+        ComplaintStatus.Approved => "bg-green-100 text-green-800 border-green-200",
+        ComplaintStatus.Rejected => "bg-red-100 text-red-800 border-red-200",
+        ComplaintStatus.ConvertedToCase => "bg-purple-100 text-purple-800 border-purple-200",
+        _ => "bg-gray-100 text-gray-800 border-gray-200",
+    };
+}
+
+<div class="space-y-6">
+    @if (TempData["Success"] != null)
+    {
+        <div class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            @TempData["Success"]
+        </div>
+    }
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">@ViewBag.PageTitle</h1>
+                <p class="mt-0.5 text-sm text-gray-600">@ViewBag.PageSubtitle</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="inline-flex items-center gap-2 rounded-xl border border-white/60 bg-white/60 px-3.5 py-2 shadow-lg backdrop-blur-xl">
+                <span class="text-sm font-semibold text-gray-900">@Model.Count concern@(Model.Count == 1 ? "" : "s")</span>
+            </div>
+            @if (canSubmit)
+            {
+                <a asp-action="Create" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    New Concern
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- List -->
+    @if (Model.Count == 0)
+    {
+        <div class="rounded-3xl border-2 border-dashed border-gray-300 bg-white/60 p-12 text-center backdrop-blur-sm">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <p class="mt-3 text-sm font-semibold text-gray-900">No concerns yet</p>
+            <p class="mt-1 text-xs text-gray-500">
+                @(canSubmit ? "Submit your first concern to get started." : "No concerns have been submitted yet.")
+            </p>
+            @if (canSubmit)
+            {
+                <a asp-action="Create" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg">Submit Concern</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="space-y-3">
+            @foreach (var c in Model)
+            {
+                <a asp-action="Detail" asp-route-id="@c.Id" class="group block rounded-2xl border border-white/60 bg-white/60 p-4 shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="truncate text-base font-semibold text-gray-900 group-hover:text-blue-700">@c.Title</h3>
+                                @if (c.IsAnonymous)
+                                {
+                                    <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">Anonymous</span>
+                                }
+                            </div>
+                            <div class="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                @if (!string.IsNullOrEmpty(c.Category))
+                                {
+                                    <span class="rounded-md bg-white/70 px-2 py-0.5">@c.Category</span>
+                                }
+                                @if (isStaff && !string.IsNullOrEmpty(c.UserName))
+                                {
+                                    <span>By @c.UserName</span>
+                                }
+                                <span>Submitted @c.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="mt-3 text-xs text-gray-400">Concern #@c.Id.ToString().Substring(0, 8)</div>
+                        </div>
+                        <span class="shrink-0 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium @StatusBadge(c.Status)">@c.Status</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

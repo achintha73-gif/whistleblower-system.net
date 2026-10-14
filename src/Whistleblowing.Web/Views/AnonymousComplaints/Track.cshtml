@@ -1,0 +1,44 @@
+﻿@model Whistleblowing.Application.DTOs.TrackComplaintDto
+@{
+    ViewData["Title"] = "Track Complaint";
+}
+
+<div class="min-h-screen py-10 px-4">
+    <div class="mx-auto max-w-md">
+        <a href="/Account/Login" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Back to login
+        </a>
+
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Track Your Complaint</h1>
+            <p class="mt-1 text-sm text-gray-600">Enter your reference code to view your anonymous complaint.</p>
+        </div>
+
+        <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+            <form asp-action="Track" method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700"></div>
+
+                <div>
+                    <label asp-for="ReferenceCode" class="mb-1.5 block text-sm font-medium text-gray-700">Reference Code</label>
+                    <input asp-for="ReferenceCode" maxlength="20" placeholder="WB-2026-XXXXXX" class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 font-mono text-lg text-gray-900 uppercase focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                    <p class="mt-1 text-xs text-gray-500">Format: WB-YYYY-XXXXXX (e.g., WB-2026-A7X9K2)</p>
+                    <span asp-validation-for="ReferenceCode" class="mt-1 block text-xs text-red-600"></span>
+                </div>
+
+                <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition inline-flex items-center justify-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    Track Complaint
+                </button>
+            </form>
+        </div>
+
+        <p class="mt-6 text-center text-xs text-gray-500">Lost your reference code? Unfortunately, we cannot recover it since your complaint is anonymous.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

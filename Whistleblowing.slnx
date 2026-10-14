@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Whistleblowing.Application/Whistleblowing.Application.csproj" />
+    <Project Path="src/Whistleblowing.Domain/Whistleblowing.Domain.csproj" />
+    <Project Path="src/Whistleblowing.Infrastructure/Whistleblowing.Infrastructure.csproj" />
+    <Project Path="src/Whistleblowing.Web/Whistleblowing.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Whistleblowing.UnitTests/Whistleblowing.UnitTests.csproj" />
+  </Folder>
+</Solution>

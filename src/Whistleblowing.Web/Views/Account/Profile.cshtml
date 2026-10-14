@@ -1,0 +1,54 @@
+﻿@model Whistleblowing.Domain.Entities.ApplicationUser
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">My Profile</h1>
+        <p class="mt-1 text-sm text-gray-600">Your account information and settings.</p>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+        <div class="lg:col-span-1">
+            <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+                <div class="flex flex-col items-center text-center">
+                    <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
+                    </div>
+                    <h2 class="mt-4 text-lg font-bold text-gray-900">@Model.FullName</h2>
+                    <p class="mt-1 text-sm text-gray-600">@Model.Email</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+                <h2 class="text-base font-semibold text-gray-900">Account Details</h2>
+                <dl class="mt-4 divide-y divide-gray-100">
+                    <div class="flex items-center justify-between py-3">
+                        <dt class="text-sm text-gray-600">Full Name</dt>
+                        <dd class="text-sm font-medium text-gray-900">@Model.FullName</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <dt class="text-sm text-gray-600">Email</dt>
+                        <dd class="text-sm font-medium text-gray-900">@Model.Email</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <dt class="text-sm text-gray-600">Phone</dt>
+                        <dd class="text-sm font-medium text-gray-900">@(string.IsNullOrEmpty(Model.Phone) ? "Not set" : Model.Phone)</dd>
+                    </div>
+                    <div class="flex items-center justify-between py-3">
+                        <dt class="text-sm text-gray-600">Status</dt>
+                        <dd>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                @Model.Status
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

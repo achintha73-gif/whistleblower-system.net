@@ -1,0 +1,75 @@
+@using Whistleblowing.Application.DTOs
+@model CreateComplaintDto
+@{
+    ViewData["Title"] = "Submit a Concern";
+    var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
+}
+
+<div class="mx-auto max-w-3xl space-y-6">
+    <a asp-action="Index" class="group inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition hover:text-blue-600">
+        <svg class="h-3.5 w-3.5 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Back to My Concerns
+    </a>
+
+    <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Submit a Concern</h1>
+            <p class="mt-0.5 text-sm text-gray-600">Report a concern about unethical, illegal, or unsafe behavior.</p>
+        </div>
+    </div>
+
+    <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl sm:p-8">
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
+
+            <div>
+                <label asp-for="Title" class="mb-1.5 block text-sm font-semibold text-gray-800">Title <span class="text-red-500">*</span></label>
+                <input asp-for="Title" type="text" maxlength="200" class="w-full rounded-xl border border-white/60 bg-white/60 px-4 py-3 text-sm transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/15" placeholder="Brief summary of your concern" />
+                <span asp-validation-for="Title" class="text-xs text-red-600"></span>
+            </div>
+
+            <div>
+                <label asp-for="Category" class="mb-1.5 block text-sm font-semibold text-gray-800">Category <span class="font-normal text-gray-400">(optional)</span></label>
+                <select asp-for="Category" class="w-full rounded-xl border border-white/60 bg-white/60 px-4 py-3 text-sm transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/15">
+                    <option value="">— Select a category —</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+                <span asp-validation-for="Category" class="text-xs text-red-600"></span>
+            </div>
+
+            <div>
+                <label asp-for="Description" class="mb-1.5 block text-sm font-semibold text-gray-800">Description <span class="text-red-500">*</span></label>
+                <textarea asp-for="Description" rows="8" maxlength="5000" class="w-full resize-y rounded-xl border border-white/60 bg-white/60 px-4 py-3 text-sm transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/15" placeholder="Describe the situation in detail. Include dates, people involved, and any relevant information."></textarea>
+                <span asp-validation-for="Description" class="text-xs text-red-600"></span>
+            </div>
+
+            <div class="rounded-2xl border border-white/60 bg-white/60 p-4 shadow-sm">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input asp-for="IsAnonymous" type="checkbox" class="mt-0.5 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <div>
+                        <span class="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
+                            <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                            Submit anonymously
+                        </span>
+                        <span class="mt-1 block text-xs text-gray-600">Your name and email will not be linked to this concern.</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-white/60 pt-5">
+                <a asp-action="Index" class="rounded-xl border border-white/60 bg-white/60 px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-white">Cancel</a>
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    Submit Concern
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

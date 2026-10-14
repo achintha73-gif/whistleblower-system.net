@@ -1,0 +1,138 @@
+﻿@model Whistleblowing.Application.DTOs.AnonymousComplaintResultDto
+@using Whistleblowing.Domain.Enums
+@{
+    ViewData["Title"] = "Complaint Details";
+    var additionalInfo = ViewData["AdditionalInfo"] as IReadOnlyList<Whistleblowing.Application.Interfaces.AnonymousInfoDto> ?? new List<Whistleblowing.Application.Interfaces.AnonymousInfoDto>();
+
+    string StatusClass(ComplaintStatus s) => s switch
+    {
+        ComplaintStatus.Pending => "bg-amber-50 text-amber-700 border-amber-200",
+        ComplaintStatus.UnderReview => "bg-blue-50 text-blue-700 border-blue-200",
+        ComplaintStatus.Approved => "bg-green-50 text-green-700 border-green-200",
+        ComplaintStatus.Rejected => "bg-red-50 text-red-700 border-red-200",
+        ComplaintStatus.ConvertedToCase => "bg-purple-50 text-purple-700 border-purple-200",
+        _ => "bg-gray-100 text-gray-700 border-gray-200",
+    };
+}
+
+<div class="min-h-screen py-10 px-4">
+    <div class="mx-auto max-w-3xl">
+        <a href="/AnonymousComplaints/Track" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Track another complaint
+        </a>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">@TempData["Error"]</div>
+        }
+
+        <div class="space-y-6">
+            <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Reference Code</p>
+                        <p class="mt-1 font-mono text-lg font-bold text-gray-900">@Model.ReferenceCode</p>
+                        <h1 class="mt-4 text-xl font-bold text-gray-900">@Model.Title</h1>
+                        <div class="mt-2 flex items-center gap-3 text-xs text-gray-500">
+                            @if (!string.IsNullOrEmpty(Model.Category))
+                            {
+                                <span>@Model.Category</span>
+                                <span>·</span>
+                            }
+                            <span>Submitted @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium @StatusClass(Model.Status)">
+                        @Model.Status
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Description</p>
+                    <p class="mt-2 whitespace-pre-wrap text-sm text-gray-800">@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-white/60 bg-white/70 shadow-xl shadow-blue-900/5 backdrop-blur-xl overflow-hidden">
+                <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                    <div>
+                        <h2 class="text-base font-semibold text-gray-900">Additional Information</h2>
+                        <p class="mt-0.5 text-xs text-gray-500">@additionalInfo.Count entr@(additionalInfo.Count == 1 ? "y" : "ies")</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('infoForm').classList.toggle('hidden')" class="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Info
+                    </button>
+                </div>
+
+                <div id="infoForm" class="hidden border-b border-gray-100 bg-gray-50/70 p-5">
+                    <form asp-action="AddInfo" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ReferenceCode" value="@Model.ReferenceCode" />
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Information Type</label>
+                            <select name="InformationType" class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                                <option value="AdditionalDetails">Additional Details</option>
+                                <option value="Clarification">Clarification</option>
+                                <option value="SupportingInfo">Supporting Information</option>
+                                <option value="Correction">Correction</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input type="text" name="Title" required maxlength="200" placeholder="Brief title for your information" class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea name="Description" required rows="5" maxlength="2000" placeholder="Provide your additional information here..." class="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">Add Information</button>
+                    </form>
+                </div>
+
+                @if (additionalInfo.Count == 0)
+                {
+                    <div class="flex flex-col items-center justify-center px-5 py-10 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                        </div>
+                        <p class="mt-3 text-sm font-medium text-gray-900">No additional information yet</p>
+                        <p class="mt-1 text-xs text-gray-500">Click "Add Info" above to submit more details about your complaint.</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="divide-y divide-gray-100">
+                        @foreach (var info in additionalInfo)
+                        {
+                            <li class="px-5 py-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <p class="text-sm font-medium text-gray-900">@info.Title</p>
+                                            <span class="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-blue-700">@info.InformationType</span>
+                                        </div>
+                                        <p class="mt-1 whitespace-pre-wrap text-sm text-gray-600">@info.Description</p>
+                                        <p class="mt-2 text-xs text-gray-400">@info.SubmittedAt.ToString("dd MMM yyyy, HH:mm")</p>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+﻿# ================================================
+# .NET / Visual Studio / VS Code
+# ================================================
+
+## Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.rsuser
+
+## Rider
+.idea/
+
+## VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+## .NET Core / Standard
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+
+# ================================================
+# Secrets & Config (IMPORTANT!)
+# ================================================
+
+## App settings with secrets
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+*.secrets.json
+secrets.json
+.env
+.env.*
+!.env.example
+
+# ================================================
+# OS / Editor
+# ================================================
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Linux
+*~
+
+# ================================================
+# Node (if any frontend)
+# ================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================================================
+# Uploads / User content
+# ================================================
+wwwroot/uploads/
+wwwroot/files/
+private-uploads/
+public/uploads/

@@ -1,0 +1,89 @@
+@using Whistleblowing.Application.DTOs
+@model AssignInvestigatorDto
+@{
+    ViewData["Title"] = "Assign Investigators";
+}
+
+<div class="mx-auto max-w-2xl space-y-6">
+    <a asp-action="Detail" asp-route-id="@Model.CaseId"
+       class="group inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition hover:text-blue-600">
+        <svg class="h-3.5 w-3.5 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Back to Case
+    </a>
+
+    <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Assign Investigators</h1>
+            <p class="mt-0.5 text-sm text-gray-600 truncate">@Model.CaseTitle</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            @TempData["Error"]
+        </div>
+    }
+
+    <form asp-action="Assign" method="post" class="space-y-5">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="caseId" value="@Model.CaseId" />
+
+        <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl">
+            <h2 class="mb-3 text-sm font-semibold text-gray-700">
+                Select Investigators (@Model.AvailableInvestigators.Count available)
+            </h2>
+
+            @if (Model.AvailableInvestigators.Count == 0)
+            {
+                <div class="rounded-2xl border-2 border-dashed border-gray-300 bg-white/50 p-6 text-center">
+                    <p class="text-sm text-gray-500">No investigators available.</p>
+                </div>
+            }
+            else
+            {
+                <ul class="divide-y divide-white/60">
+                    @foreach (var inv in Model.AvailableInvestigators)
+                    {
+                        var isChecked = Model.SelectedInvestigatorIds.Contains(inv.Id);
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-white/70 @(isChecked ? "bg-blue-50/60" : "")">
+                                <input type="checkbox" name="investigatorIds" value="@inv.Id"
+                                       @(isChecked ? "checked" : "")
+                                       class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-semibold text-white">
+                                    @(inv.FullName.Length > 0 ? inv.FullName[0].ToString().ToUpper() : "?")
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="truncate text-sm font-semibold text-gray-900">@inv.FullName</div>
+                                    <div class="truncate text-xs text-gray-500">@inv.Email</div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(inv.DepartmentName))
+                                {
+                                    <span class="shrink-0 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+                                        @inv.DepartmentName
+                                    </span>
+                                }
+                            </label>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <a asp-action="Detail" asp-route-id="@Model.CaseId"
+               class="rounded-xl border border-white/60 bg-white/60 px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-white">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                Save Assignments
+            </button>
+        </div>
+    </form>
+</div>

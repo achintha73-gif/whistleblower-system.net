@@ -1,0 +1,103 @@
+﻿@model Whistleblowing.Web.Models.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In - Whistleblowing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css" />
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="rounded-2xl border border-white/60 bg-white/80 p-8 shadow-2xl backdrop-blur-xl">
+            <div class="mb-6 flex flex-col items-center text-center">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg shadow-blue-600/30">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h1 class="mt-4 text-2xl font-bold text-gray-900">Whistleblowing System</h1>
+                <p class="mt-1 text-xs font-medium text-gray-500">Secure. Anonymous. Trusted.</p>
+            </div>
+
+            <h2 class="text-center text-xl font-bold text-gray-900 mb-1">Welcome Back</h2>
+            <p class="text-center text-sm text-gray-500 mb-6">Sign in to access your dashboard</p>
+
+            <form asp-action="Login" asp-controller="Account" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700"></div>
+
+                <div>
+                    <label asp-for="Email" class="block text-sm font-medium text-gray-700 mb-1.5"></label>
+                    <input asp-for="Email" type="email" autocomplete="email"
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-3.5 py-3 text-sm text-gray-900 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                           placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Password" class="block text-sm font-medium text-gray-700 mb-1.5"></label>
+                    <input asp-for="Password" type="password" autocomplete="current-password"
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-3.5 py-3 text-sm text-gray-900 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                           placeholder="Enter your password" />
+                    <span asp-validation-for="Password" class="text-xs text-red-600"></span>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-gray-700">
+                    <input asp-for="RememberMe" type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <span>Remember me</span>
+                </label>
+
+                <button type="submit"
+                        class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
+                    Sign in
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-gray-600">
+                Don't have an account?
+                <a asp-action="Register" asp-controller="Account" class="font-medium text-blue-600 hover:text-blue-700">Create account</a>
+            </div>
+
+            <div class="mt-6 space-y-3">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                        <span class="bg-white/80 px-2 text-gray-500">Or</span>
+                    </div>
+                </div>
+
+                <a href="/AnonymousComplaints/Submit"
+                   class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-blue-200 bg-blue-50/50 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    Submit Anonymously
+                </a>
+
+                <a href="/AnonymousComplaints/Track"
+                   class="flex w-full items-center justify-center gap-1.5 text-xs font-medium text-gray-600 transition hover:text-blue-600">
+                    Already submitted anonymously? Track your complaint
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-800">
+                <p class="font-semibold mb-1">Test credentials:</p>
+                <p>admin@wb.local / Admin@12345</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

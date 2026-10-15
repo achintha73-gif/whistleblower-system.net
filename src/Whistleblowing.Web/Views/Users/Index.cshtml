@@ -17,6 +17,10 @@
             @TempData["Success"]
         </div>
     }
+    @if (TempData["Error"] != null)
+    {
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">@TempData["Error"]</div>
+    }
 
     <!-- Header -->
     <div class="flex flex-wrap items-center justify-between gap-4">
@@ -67,13 +71,14 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Joined</th>
+                        @if (isAdmin) { <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th> }
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/50">
                     @if (Model.Count == 0)
                     {
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center text-sm text-gray-500">
+                            <td colspan="@(isAdmin ? 6 : 5)" class="px-4 py-12 text-center text-sm text-gray-500">
                                 No users found.
                             </td>
                         </tr>
@@ -123,6 +128,12 @@
                                 <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                     @user.CreatedAt.ToString("MMM dd, yyyy")
                                 </td>
+                                @if (isAdmin)
+                                {
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex justify-end gap-1"><a asp-action="Edit" asp-route-id="@user.Id" class="rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition hover:bg-blue-50 hover:text-blue-800">Edit</a><form asp-action="Archive" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Archive this user account? They will lose access, but their records will remain.');">@Html.AntiForgeryToken()<button type="submit" class="rounded-md px-2 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 hover:text-rose-800">Archive</button></form></div>
+                                    </td>
+                                }
                             </tr>
                         }
                     }

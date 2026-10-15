@@ -16,12 +16,13 @@ public class AdminStatsService : IAdminStatsService
 
     public async Task<AdminStatsDto> GetStatsAsync(CancellationToken ct = default)
     {
-        var totalUsers = await _db.Users.CountAsync(ct);
+        var activeAccounts = _db.Users.Where(u => !u.IsDeleted);
+        var totalUsers = await activeAccounts.CountAsync(ct);
 
-        var activeUsers = await _db.Users
+        var activeUsers = await activeAccounts
             .CountAsync(u => u.Status == UserStatus.Active, ct);
 
-        var suspendedUsers = await _db.Users
+        var suspendedUsers = await activeAccounts
             .CountAsync(u => u.Status == UserStatus.Suspended
                           || u.Status == UserStatus.Inactive, ct);
 

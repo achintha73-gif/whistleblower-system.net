@@ -20,6 +20,26 @@ public class ComplaintDto
     public Guid? CaseId { get; set; }
     public int AdditionalInfoCount { get; set; }
     public int EvidenceCount { get; set; }
+    public IReadOnlyList<EvidenceItemDto> Evidence { get; set; } = Array.Empty<EvidenceItemDto>();
+    public IReadOnlyList<AdditionalInformationItemDto> AdditionalInformation { get; set; } = Array.Empty<AdditionalInformationItemDto>();
+}
+
+public class EvidenceItemDto
+{
+    public Guid Id { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateTime UploadedAt { get; set; }
+    public string? UploadedBy { get; set; }
+}
+
+public class AdditionalInformationItemDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string InformationType { get; set; } = string.Empty;
+    public DateTime SubmittedAt { get; set; }
 }
 
 public class CreateComplaintDto

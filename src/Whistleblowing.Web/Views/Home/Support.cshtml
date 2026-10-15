@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Support";
+    var supportPhone = (string?)ViewBag.SupportPhone;
+    var supportEmail = (string?)ViewBag.SupportEmail;
+    var phoneLink = supportPhone is null ? null : System.Text.RegularExpressions.Regex.Replace(supportPhone, @"[^+0-9]", string.Empty);
+}
+
+<div class="mx-auto max-w-4xl space-y-7">
+    <section class="overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-7 shadow-xl shadow-indigo-900/5 backdrop-blur-xl sm:p-9">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.6 9a2.4 2.4 0 114.3 1.45c-.9 1.05-1.9 1.3-1.9 2.55M12 16.5h.01"/></svg>
+        </div>
+        <p class="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-blue-600">Help center</p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">How can we help?</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">Find guidance for account access, concerns, investigations, and anonymous reports.</p>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+        <article class="rounded-2xl border border-white/70 bg-white/75 p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2m4-10a4 4 0 110-8 4 4 0 010 8zm12 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <h2 class="mt-4 font-semibold text-slate-900">Account and access</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">For sign-in, account, or role access issues, contact your organization’s system administrator.</p>
+            <a asp-controller="Account" asp-action="Profile" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900">Open my profile <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="rounded-2xl border border-white/70 bg-white/75 p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <h2 class="mt-4 font-semibold text-slate-900">Concerns and cases</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">Use the concerns or cases section to review updates. Contact the assigned manager or investigator if you need help with a specific case.</p>
+            @if (User.IsInRole("Investigator"))
+            {
+                <a asp-controller="Cases" asp-action="Index" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:text-violet-900">Open my cases <span aria-hidden="true">→</span></a>
+            }
+            else
+            {
+                <a asp-controller="Complaints" asp-action="Index" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 hover:text-violet-900">Open concerns <span aria-hidden="true">→</span></a>
+            }
+        </article>
+        <article class="rounded-2xl border border-white/70 bg-white/75 p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h2 class="mt-4 font-semibold text-slate-900">Anonymous reports</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">Keep your reference code in a safe place. You need it to check the status of your anonymous concern.</p>
+            <a asp-controller="AnonymousComplaints" asp-action="Track" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-900">Track a concern <span aria-hidden="true">→</span></a>
+        </article>
+    </section>
+
+    <section class="rounded-2xl border border-white/70 bg-white/75 p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl sm:p-7">
+        <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 5a2 2 0 012-2h3.3a1 1 0 01.95.68l1.5 4.5a1 1 0 01-.5 1.2l-2.2 1.1a11 11 0 005.5 5.5l1.1-2.2a1 1 0 011.2-.5l4.5 1.5a1 1 0 01.68.95V19a2 2 0 01-2 2h-1C9.7 21 3 14.3 3 6V5z"/></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h2 class="font-semibold text-slate-900">Contact support</h2>
+                <p class="mt-1 text-sm text-slate-600">Choose a contact option to call or email the support team.</p>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    @if (!string.IsNullOrWhiteSpace(supportPhone) && !string.IsNullOrWhiteSpace(phoneLink))
+                    {
+                        <a href="tel:@phoneLink" class="inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"><span aria-hidden="true">☎</span> Call @supportPhone</a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(supportEmail))
+                    {
+                        <a href="mailto:@supportEmail" class="inline-flex items-center gap-2 rounded-xl bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-100"><span aria-hidden="true">✉</span> Email @supportEmail</a>
+                    }
+                    @if (string.IsNullOrWhiteSpace(supportPhone) && string.IsNullOrWhiteSpace(supportEmail))
+                    {
+                        <p class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">Support contact details haven’t been added yet. Please contact your organization’s system administrator.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3">
+        <a asp-controller="Dashboard" asp-action="Index" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 hover:shadow-xl">Back to dashboard</a>
+        <a asp-controller="AnonymousComplaints" asp-action="Track" class="inline-flex items-center justify-center rounded-xl border border-white/80 bg-white/70 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white">Track an anonymous concern</a>
+    </div>
+</div>

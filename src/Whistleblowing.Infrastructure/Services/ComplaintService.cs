@@ -28,7 +28,7 @@ public class ComplaintService : IComplaintService
             .Include(c => c.User)
             .Include(c => c.Case)
             .Include(c => c.AdditionalInfo)
-            .Include(c => c.Evidence)
+            .Include(c => c.Evidence).ThenInclude(e => e.UploadedBy)
             .AsNoTracking()
             .Where(c => c.UserId == userId && !c.IsAnonymous)
             .OrderByDescending(c => c.CreatedAt)
@@ -43,7 +43,7 @@ public class ComplaintService : IComplaintService
             .Include(c => c.User)
             .Include(c => c.Case)
             .Include(c => c.AdditionalInfo)
-            .Include(c => c.Evidence)
+            .Include(c => c.Evidence).ThenInclude(e => e.UploadedBy)
             .AsNoTracking()
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync(ct);
@@ -57,7 +57,7 @@ public class ComplaintService : IComplaintService
             .Include(c => c.User)
             .Include(c => c.Case)
             .Include(c => c.AdditionalInfo)
-            .Include(c => c.Evidence)
+            .Include(c => c.Evidence).ThenInclude(e => e.UploadedBy)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
@@ -66,17 +66,27 @@ public class ComplaintService : IComplaintService
 
     public async Task<ComplaintDto> CreateAsync(Guid userId, CreateComplaintDto input, CancellationToken ct = default)
     {
+        var isAnonymous = input.IsAnonymous;
         var complaint = new Complaint
         {
             Title = input.Title.Trim(),
             Description = input.Description.Trim(),
             Category = string.IsNullOrWhiteSpace(input.Category) ? null : input.Category.Trim(),
             Status = ComplaintStatus.Pending,
-            IsAnonymous = input.IsAnonymous,
-            UserId = userId,
+            IsAnonymous = isAnonymous,
+            UserId = isAnonymous ? null : userId,
+            ReferenceCode = isAnonymous ? await _codeService.GenerateUniqueAsync(ct) : null,
         };
 
         _db.Complaints.Add(complaint);
+        _db.ActivityLogs.Add(new ActivityLog
+        {
+            EventType = "ComplaintSubmitted",
+            Description = input.IsAnonymous ? "An anonymous concern was submitted." : "A concern was submitted.",
+            EntityType = "Complaint",
+            EntityId = complaint.Id,
+            ActorId = isAnonymous ? null : userId,
+        });
         await _db.SaveChangesAsync(ct);
 
         var created = await _db.Complaints
@@ -122,6 +132,13 @@ public class ComplaintService : IComplaintService
         };
 
         _db.Complaints.Add(complaint);
+        _db.ActivityLogs.Add(new ActivityLog
+        {
+            EventType = "ComplaintSubmitted",
+            Description = "An anonymous concern was submitted.",
+            EntityType = "Complaint",
+            EntityId = complaint.Id,
+        });
         await _db.SaveChangesAsync(ct);
 
         return MapToAnonymousDto(complaint);
@@ -161,6 +178,13 @@ public class ComplaintService : IComplaintService
         };
 
         _db.AdditionalInformation.Add(info);
+        _db.ActivityLogs.Add(new ActivityLog
+        {
+            EventType = "AnonymousAdditionalInformationSubmitted",
+            Description = "Additional information was submitted for an anonymous concern.",
+            EntityType = "Complaint",
+            EntityId = complaint.Id,
+        });
         await _db.SaveChangesAsync(ct);
         return true;
     }
@@ -216,6 +240,22 @@ public class ComplaintService : IComplaintService
             CaseId = c.Case?.Id,
             AdditionalInfoCount = c.AdditionalInfo?.Count ?? 0,
             EvidenceCount = c.Evidence?.Count ?? 0,
+            Evidence = c.Evidence?.OrderByDescending(e => e.UploadedAt).Select(e => new EvidenceItemDto
+            {
+                Id = e.Id,
+                FileName = e.FileName,
+                Description = e.Description,
+                UploadedAt = e.UploadedAt,
+                UploadedBy = e.UploadedBy?.FullName,
+            }).ToList() ?? new List<EvidenceItemDto>(),
+            AdditionalInformation = c.AdditionalInfo?.OrderByDescending(i => i.CreatedAt).Select(i => new AdditionalInformationItemDto
+            {
+                Id = i.Id,
+                Title = i.Title,
+                Description = i.Description,
+                InformationType = i.InformationType.ToString(),
+                SubmittedAt = i.CreatedAt,
+            }).ToList() ?? new List<AdditionalInformationItemDto>(),
         };
     }
 

@@ -1,0 +1,19 @@
+@model Whistleblowing.Web.Models.Users.EditUserViewModel
+@{ ViewData["Title"] = "Edit User"; }
+<div class="mx-auto max-w-2xl space-y-6">
+    <a asp-action="Index" class="text-sm font-medium text-blue-700">← Back to users</a>
+    <div><h1 class="text-2xl font-bold text-gray-900">Edit user</h1><p class="mt-1 text-sm text-gray-600">Update account details, access role and status.</p></div>
+    <form asp-action="Edit" method="post" class="space-y-5 rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl">
+        @Html.AntiForgeryToken()<input asp-for="Id" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700"></div>
+        <div><label asp-for="FullName" class="mb-1 block text-sm font-semibold text-gray-800">Full name</label><input asp-for="FullName" class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" /><span asp-validation-for="FullName" class="text-xs text-rose-600"></span></div>
+        <div><label asp-for="Email" class="mb-1 block text-sm font-semibold text-gray-800">Email</label><input asp-for="Email" type="email" class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" /><span asp-validation-for="Email" class="text-xs text-rose-600"></span></div>
+        <div><label asp-for="Phone" class="mb-1 block text-sm font-semibold text-gray-800">Phone</label><input asp-for="Phone" type="tel" class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" /><span asp-validation-for="Phone" class="text-xs text-rose-600"></span></div>
+        <div class="grid gap-4 sm:grid-cols-3">
+            <div><label asp-for="RoleName" class="mb-1 block text-sm font-semibold text-gray-800">Role</label><select asp-for="RoleName" asp-items="ViewBag.Roles" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm"><option value="">Select role</option></select><span asp-validation-for="RoleName" class="text-xs text-rose-600"></span></div>
+            <div><label asp-for="DepartmentId" class="mb-1 block text-sm font-semibold text-gray-800">Department</label><select asp-for="DepartmentId" asp-items="ViewBag.Departments" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm"><option value="">No department</option></select><span asp-validation-for="DepartmentId" class="text-xs text-rose-600"></span></div>
+            <div><label asp-for="Status" class="mb-1 block text-sm font-semibold text-gray-800">Status</label><select asp-for="Status" asp-items="ViewBag.Statuses" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm"></select><span asp-validation-for="Status" class="text-xs text-rose-600"></span></div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-gray-100 pt-4"><a asp-action="Index" class="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Cancel</a><button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Save changes</button></div>
+    </form>
+</div>

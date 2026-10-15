@@ -1,0 +1,7 @@
+@model Whistleblowing.Web.Controllers.InvestigationReportFormModel
+@{ ViewData["Title"] = "Investigation Report"; }
+<div class="mx-auto max-w-3xl space-y-6"><a asp-action="Detail" asp-route-id="@Model.CaseId" class="text-sm font-medium text-blue-700">← Back to case</a><div><h1 class="text-2xl font-bold text-gray-900">Investigation report</h1><p class="mt-1 text-sm text-gray-600">Record findings and recommendations for this case.</p></div>
+<form asp-action="Report" method="post" class="space-y-5 rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl">@Html.AntiForgeryToken()<input asp-for="CaseId" type="hidden" /><div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+<div><label asp-for="Findings" class="mb-1 block text-sm font-semibold text-gray-800">Findings</label><textarea asp-for="Findings" rows="10" maxlength="10000" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"></textarea><span asp-validation-for="Findings" class="text-xs text-red-600"></span></div>
+<div><label asp-for="Recommendation" class="mb-1 block text-sm font-semibold text-gray-800">Recommendation</label><textarea asp-for="Recommendation" rows="5" maxlength="5000" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"></textarea><span asp-validation-for="Recommendation" class="text-xs text-red-600"></span></div>
+<div class="flex justify-end"><button type="submit" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white">Save report</button></div></form></div>

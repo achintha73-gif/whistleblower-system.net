@@ -26,6 +26,8 @@
 }
 
 <div class="mx-auto max-w-4xl space-y-6">
+    @if (TempData["Success"] != null) { <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">@TempData["Success"]</div> }
+    @if (TempData["Error"] != null) { <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">@TempData["Error"]</div> }
     <a asp-action="Index" class="group inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition hover:text-blue-600">
         <svg class="h-3.5 w-3.5 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         Back to Cases
@@ -57,6 +59,10 @@
                     Manage Investigators
                 </a>
             </div>
+        }
+        @if (isManager && Model.Status == CaseStatus.PendingReview)
+        {
+            <div class="mt-3 flex flex-wrap items-end gap-3"><form asp-action="Close" method="post" class="flex flex-wrap items-end gap-3">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><label class="text-xs font-medium text-gray-600">Review note (optional)<input name="note" maxlength="1000" class="mt-1 block rounded-lg border border-gray-200 px-3 py-2 text-sm" /></label><button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white">Close case</button></form><form asp-action="ReturnForInvestigation" method="post" class="flex flex-wrap items-end gap-3">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><label class="text-xs font-medium text-gray-600">Return note (optional)<input name="note" maxlength="1000" class="mt-1 block rounded-lg border border-gray-200 px-3 py-2 text-sm" /></label><button type="submit" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800">Return for investigation</button></form></div>
         }
 
         <div class="mt-6 grid grid-cols-1 gap-4 border-t border-white/60 pt-4 text-sm sm:grid-cols-2">
@@ -103,11 +109,21 @@
         <p class="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-800">@Model.ComplaintDescription</p>
     </div>
 
+    @if (Model.AdditionalInformation.Count > 0)
+    {
+        <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl"><h2 class="text-sm font-semibold text-gray-700">Additional information (@Model.AdditionalInformation.Count)</h2>
+            @foreach (var info in Model.AdditionalInformation)
+            {
+                <div class="mt-3 rounded-xl bg-white/70 p-4"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-sm font-semibold text-gray-800">@info.Title</h3><span class="text-xs text-gray-500">@info.InformationType · @info.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</span></div><p class="mt-2 whitespace-pre-wrap text-sm text-gray-700">@info.Description</p></div>
+            }
+        </div>
+    }
+
     <!-- Evidence -->
     <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl">
         <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-gray-700">Evidence (@Model.EvidenceCount)</h2>
-            @if (isInvestigator)
+            @if ((bool)(ViewBag.CanUploadEvidence ?? false))
             {
                 <span class="text-xs text-blue-600 font-medium">Upload available</span>
             }
@@ -118,9 +134,23 @@
                 <p class="text-sm text-gray-500">No evidence uploaded yet.</p>
             </div>
         }
-        else
+        @foreach (var evidence in Model.Evidence)
         {
-            <p class="mt-2 text-xs text-gray-500">Evidence display coming soon.</p>
+            <div class="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/70 p-3 text-sm">
+                <div class="min-w-0">
+                    <a asp-action="DownloadEvidence" asp-route-id="@evidence.Id" class="truncate font-medium text-blue-700 hover:underline">@evidence.FileName</a>
+                    <p class="text-xs text-gray-500">
+                        @if (!string.IsNullOrWhiteSpace(evidence.Description)) { @evidence.Description <span>·</span> }
+                        @evidence.UploadedAt.ToString("MMM dd, yyyy HH:mm")
+                        @if (!string.IsNullOrWhiteSpace(evidence.UploadedBy)) { <span>· Uploaded by @evidence.UploadedBy</span> }
+                    </p>
+                </div>
+                <a asp-action="DownloadEvidence" asp-route-id="@evidence.Id" class="shrink-0 text-xs font-semibold text-blue-700">Download</a>
+            </div>
+        }
+        @if ((bool)(ViewBag.CanUploadEvidence ?? false))
+        {
+            <form asp-action="UploadEvidence" method="post" enctype="multipart/form-data" class="mt-4 grid gap-3 border-t border-white/60 pt-4 sm:grid-cols-2">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><label class="text-xs font-medium text-gray-700">Evidence file (PDF, PNG, JPEG, TXT; max @ViewBag.MaxEvidenceSizeMb MB)<input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.txt" required class="mt-1 block w-full text-sm" /></label><label class="text-xs font-medium text-gray-700">Description (optional)<input name="description" maxlength="500" class="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" /></label><div class="sm:col-span-2"><button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white">Upload evidence</button></div></form>
         }
     </div>
 
@@ -145,7 +175,15 @@
         }
         else
         {
-            <p class="mt-2 text-xs text-gray-500">Report display coming soon.</p>
+            <div class="mt-4 space-y-4 rounded-xl bg-white/70 p-4"><div><h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Findings</h3><p class="mt-2 whitespace-pre-wrap text-sm text-gray-800">@Model.ReportFindings</p></div><div class="border-t border-gray-100 pt-3"><h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Recommendation</h3><p class="mt-2 whitespace-pre-wrap text-sm text-gray-800">@Model.ReportRecommendation</p></div></div>
+        }
+        @if ((bool)(ViewBag.CanSubmitReport ?? false) && Model.Status == CaseStatus.Investigating)
+        {
+            <a asp-action="Report" asp-route-id="@Model.Id" class="mt-4 inline-flex rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white">@(Model.HasReport ? "Edit report" : "Write report")</a>
+        }
+        @if ((bool)(ViewBag.CanSubmitForReview ?? false) && Model.Status == CaseStatus.Investigating && Model.HasReport)
+        {
+            <form asp-action="SubmitForReview" method="post" class="mt-4">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><button type="submit" class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white">Submit for manager review</button></form>
         }
     </div>
 
@@ -160,7 +198,10 @@
         }
         else
         {
-            <p class="mt-2 text-xs text-gray-500">Timeline coming soon.</p>
+            @foreach (var history in Model.StatusHistory)
+            {
+                <div class="mt-3 flex gap-3 rounded-xl bg-white/70 p-3"><div class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500"></div><div><div class="text-sm font-semibold text-gray-800">@history.Status</div><p class="mt-1 text-sm text-gray-600">@history.Note</p><div class="mt-1 text-xs text-gray-500">@history.ChangedAt.ToString("MMM dd, yyyy HH:mm") · @(history.ChangedBy ?? "System")</div></div></div>
+            }
         }
     </div>
 </div>

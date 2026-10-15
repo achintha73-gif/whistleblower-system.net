@@ -1,0 +1,15 @@
+@model Whistleblowing.Web.Controllers.DepartmentFormModel
+@{ var editing = Model.Id != Guid.Empty; ViewData["Title"] = editing ? "Edit Department" : "Add Department"; }
+<div class="mx-auto max-w-2xl space-y-6">
+    <a asp-action="Index" class="text-sm font-medium text-blue-700">← Back to departments</a>
+    <div><h1 class="text-2xl font-bold text-gray-900">@(editing ? "Edit department" : "Add department")</h1><p class="mt-1 text-sm text-gray-600">Set the department name, description, and manager.</p></div>
+    <form asp-action="@(editing ? "Edit" : "Create")" method="post" class="space-y-5 rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+        <div><label asp-for="Name" class="mb-1 block text-sm font-semibold text-gray-800">Name</label><input asp-for="Name" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><span asp-validation-for="Name" class="text-xs text-red-600"></span></div>
+        <div><label asp-for="Description" class="mb-1 block text-sm font-semibold text-gray-800">Description</label><textarea asp-for="Description" rows="4" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"></textarea><span asp-validation-for="Description" class="text-xs text-red-600"></span></div>
+        <div><label asp-for="ManagerId" class="mb-1 block text-sm font-semibold text-gray-800">Manager</label><select asp-for="ManagerId" asp-items="ViewBag.Managers" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"><option value="">No manager assigned</option></select></div>
+        <div class="flex justify-end gap-3 border-t border-gray-100 pt-4"><a asp-action="Index" class="rounded-xl border px-5 py-2.5 text-sm text-gray-700">Cancel</a><button class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white" type="submit">Save department</button></div>
+    </form>
+</div>

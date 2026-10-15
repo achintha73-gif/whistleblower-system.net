@@ -36,6 +36,7 @@ public class UserManagementService : IUserManagementService
         var query = _db.Users
             .Include(u => u.Department)
             .AsNoTracking()
+            .Where(u => !u.IsDeleted)
             .AsQueryable();
 
         // Manager scope: only same department

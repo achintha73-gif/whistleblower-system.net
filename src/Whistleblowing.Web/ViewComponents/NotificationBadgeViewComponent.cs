@@ -27,6 +27,6 @@ public class NotificationBadgeViewComponent : ViewComponent
         if (count == 0) return Content(string.Empty);
 
         var display = count > 99 ? "99+" : count.ToString();
-        return Content($"<span class=\"absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-rose-600 px-1 text-[10px] font-bold text-white shadow-md shadow-red-500/30\">{display}</span>");
+        return View("Default", display);
     }
 }

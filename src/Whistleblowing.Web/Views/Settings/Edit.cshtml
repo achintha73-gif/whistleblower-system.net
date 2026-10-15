@@ -1,0 +1,35 @@
+@model Whistleblowing.Web.Controllers.SettingFormModel
+@{ var editing = Model.Id != Guid.Empty; ViewData["Title"] = editing ? "Edit Setting" : "Add Setting"; }
+<div class="mx-auto max-w-2xl space-y-6"><a asp-action="Index" class="text-sm font-medium text-blue-700">← Back to settings</a><div><h1 class="text-2xl font-bold text-gray-900">@(editing ? "Edit setting" : "Add setting")</h1><p class="mt-1 text-sm text-gray-600">These values are stored in the application database.</p></div>
+<form asp-action="@(editing ? "Edit" : "Create")" method="post" class="space-y-5 rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl">@Html.AntiForgeryToken()<input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+<div><label asp-for="Key" class="mb-1 block text-sm font-semibold text-gray-800">Key</label><input asp-for="Key" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><span asp-validation-for="Key" class="text-xs text-red-600"></span></div>
+@if (Model.Key == ApplicationSettingKeys.AnonymousSubmissionsEnabled)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Anonymous submissions</label><select asp-for="Value" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"><option value="true">Enabled</option><option value="false">Disabled</option></select><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else if (Model.Key == ApplicationSettingKeys.DefaultCasePriority)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Default priority</label><select asp-for="Value" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option><option value="Critical">Critical</option></select><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else if (Model.Key == ApplicationSettingKeys.EvidenceMaxFileSizeMb)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Maximum evidence size (MB)</label><input asp-for="Value" type="number" min="1" max="25" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><p class="mt-1 text-xs text-gray-500">Choose a limit from 1 to 25 MB per file.</p><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else if (Model.Key == ApplicationSettingKeys.OrganizationName)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Organization name</label><input asp-for="Value" maxlength="100" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else if (Model.Key == ApplicationSettingKeys.SupportPhone)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Support phone</label><input asp-for="Value" type="tel" maxlength="40" placeholder="+94 11 234 5678" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><p class="mt-1 text-xs text-gray-500">Leave blank to hide the call button on the Support page.</p><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else if (Model.Key == ApplicationSettingKeys.SupportEmail)
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Support email</label><input asp-for="Value" type="email" maxlength="254" placeholder="support@example.com" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm" /><p class="mt-1 text-xs text-gray-500">Leave blank to hide the email button on the Support page.</p><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+else
+{
+    <div><label asp-for="Value" class="mb-1 block text-sm font-semibold text-gray-800">Value</label><textarea asp-for="Value" rows="5" maxlength="10000" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"></textarea><span asp-validation-for="Value" class="text-xs text-red-600"></span></div>
+}
+<div><label asp-for="Description" class="mb-1 block text-sm font-semibold text-gray-800">Description</label><textarea asp-for="Description" rows="2" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"></textarea><span asp-validation-for="Description" class="text-xs text-red-600"></span></div>
+<div class="flex justify-end gap-3 border-t border-gray-100 pt-4"><a asp-action="Index" class="rounded-xl border px-5 py-2.5 text-sm text-gray-700">Cancel</a><button class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white" type="submit">Save setting</button></div></form></div>

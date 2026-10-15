@@ -88,3 +88,6 @@ wwwroot/uploads/
 wwwroot/files/
 private-uploads/
 public/uploads/
+
+# Local evidence and application data
+src/Whistleblowing.Web/App_Data/

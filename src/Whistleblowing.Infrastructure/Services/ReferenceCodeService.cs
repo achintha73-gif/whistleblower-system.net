@@ -21,7 +21,7 @@ public class ReferenceCodeService : IReferenceCodeService
 
         for (var attempt = 0; attempt < 10; attempt++)
         {
-            var code = $"WB-{year}-{RandomCode(6)}";
+            var code = $"WB-{year}-{RandomCode(12)}";
             var exists = await _db.Complaints
                 .AnyAsync(c => c.ReferenceCode == code, ct);
 

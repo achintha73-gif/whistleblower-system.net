@@ -1,20 +1,11 @@
-﻿@{
-    ViewData["Title"] = "Settings";
-}
-
+@model IReadOnlyList<Whistleblowing.Domain.Entities.SystemSetting>
+@{ ViewData["Title"] = "Settings"; }
 <div class="space-y-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-        <p class="mt-1 text-sm text-gray-600">System configuration and preferences.</p>
-    </div>
-
-    <div class="rounded-2xl border border-white/60 bg-white/70 p-12 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
-        <div class="text-center">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
-                <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-            <h2 class="mt-5 text-xl font-bold text-gray-900">System Settings</h2>
-            <p class="mt-2 text-sm text-gray-600">This page is under construction. Settings features coming soon.</p>
-        </div>
-    </div>
+    <div class="flex flex-wrap items-center justify-between gap-4"><div><h1 class="text-2xl font-bold text-gray-900">System settings</h1><p class="mt-1 text-sm text-gray-600">Manage application-wide configuration values.</p></div><a asp-action="Create" class="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white">Add setting</a></div>
+    @if (TempData["Success"] is string message) { <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">@message</div> }
+    <div class="overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-xl"><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-white/70 text-left text-xs uppercase tracking-wide text-gray-500"><tr><th class="px-5 py-3">Key</th><th class="px-5 py-3">Value</th><th class="px-5 py-3">Description</th><th class="px-5 py-3 text-right">Actions</th></tr></thead><tbody class="divide-y divide-gray-100">
+        @foreach (var setting in Model) { <tr><td class="px-5 py-4 font-mono font-semibold text-gray-900">@setting.Key</td><td class="max-w-sm break-words px-5 py-4 text-gray-700">@setting.Value</td><td class="px-5 py-4 text-gray-500">@setting.Description</td><td class="px-5 py-4"><div class="flex justify-end gap-1"><a asp-action="Edit" asp-route-id="@setting.Id" class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50/70 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 0 1 2.828 2.828l-8.9 8.9-3.757.929.929-3.757 8.9-8.9ZM12.172 5l2.828 2.828" /></svg>Edit</a><form asp-action="Delete" asp-route-id="@setting.Id" method="post" onsubmit="return confirm('Delete this setting?');">@Html.AntiForgeryToken()<button type="submit" class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50/70 hover:text-rose-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 2a1 1 0 0 0-1 1v1H4a1 1 0 1 0 0 2h.5l.7 9.1A2 2 0 0 0 7.2 17h5.6a2 2 0 0 0 2-1.9l.7-9.1H16a1 1 0 1 0 0-2h-3V3a1 1 0 0 0-1-1H8Zm2 2h1V4h-1v0ZM8 8a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm4 0a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Z" clip-rule="evenodd" /></svg>Delete</button></form></div></td></tr> }
+        @if (Model.Count == 0) { <tr><td colspan="4" class="px-5 py-10 text-center text-gray-500">No system settings have been added.</td></tr> }
+        </tbody></table></div></div>
 </div>

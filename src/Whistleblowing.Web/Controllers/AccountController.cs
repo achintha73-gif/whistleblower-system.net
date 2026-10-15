@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Whistleblowing.Domain.Entities;
 using Whistleblowing.Domain.Enums;
 using Whistleblowing.Web.Models.Account;
+using Whistleblowing.Web.Services;
 
 namespace Whistleblowing.Web.Controllers;
 
@@ -13,15 +14,95 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<AccountController> _logger;
+    private readonly IAccountEmailSender _emailSender;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        ILogger<AccountController> logger)
+        ILogger<AccountController> logger,
+        IAccountEmailSender emailSender)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _emailSender = emailSender;
+    }
+
+    // -------------------------------------------------------------
+    // FORGOT / RESET PASSWORD
+    // -------------------------------------------------------------
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is not null && user.Status == UserStatus.Active)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetUrl = Url.Action(nameof(ResetPassword), "Account", new
+            {
+                userId = user.Id,
+                token
+            }, Request.Scheme);
+
+            if (!string.IsNullOrWhiteSpace(resetUrl))
+                await _emailSender.SendPasswordResetAsync(user.Email!, resetUrl, HttpContext.RequestAborted);
+        }
+
+        // Keep the response the same whether an account exists, to avoid revealing registered emails.
+        return RedirectToAction(nameof(ForgotPasswordConfirmation));
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ForgotPasswordConfirmation() => View();
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword(string? userId, string? token)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+            return View("ResetPasswordInvalid");
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            return View("ResetPasswordInvalid");
+
+        return View(new ResetPasswordViewModel { UserId = user.Id.ToString(), Token = token, Email = user.Email ?? string.Empty });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user is null || !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            return View("ResetPasswordInvalid");
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+        if (result.Succeeded)
+        {
+            TempData["PasswordResetSuccess"] = "Your password has been reset. Sign in with your new password.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        foreach (var error in result.Errors)
+            ModelState.AddModelError(string.Empty, error.Description);
+
+        return View(model);
     }
 
     // -------------------------------------------------------------
@@ -30,12 +111,13 @@ public class AccountController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Login(string? returnUrl = null)
+    public IActionResult Login(string? returnUrl = null, string? mode = null)
     {
         if (User.Identity?.IsAuthenticated == true)
             return RedirectToAction("Index", "Home");
 
         ViewData["ReturnUrl"] = returnUrl;
+        ViewBag.LoginMode = string.Equals(mode, "anonymous", StringComparison.OrdinalIgnoreCase) ? "anonymous" : "employee";
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
 
@@ -169,7 +251,65 @@ public class AccountController : Controller
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return NotFound();
 
+        ViewBag.Profile = new EditProfileViewModel { FullName = user.FullName, Phone = user.Phone };
         return View(user);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile(EditProfileViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Profile = model;
+            return View("Profile", user);
+        }
+
+        user.FullName = model.FullName.Trim();
+        user.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
+        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedByUserId = user.Id;
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+            ViewBag.Profile = model;
+            return View("Profile", user);
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        TempData["ProfileSuccess"] = "Your profile has been updated.";
+        return RedirectToAction(nameof(Profile));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Profile = new EditProfileViewModel { FullName = user.FullName, Phone = user.Phone };
+            ViewBag.PasswordModel = model;
+            return View("Profile", user);
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors) ModelState.AddModelError("Password", error.Description);
+            ViewBag.Profile = new EditProfileViewModel { FullName = user.FullName, Phone = user.Phone };
+            ViewBag.PasswordModel = model;
+            return View("Profile", user);
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        TempData["PasswordSuccess"] = "Your password has been changed.";
+        return RedirectToAction(nameof(Profile));
     }
 
     // -------------------------------------------------------------

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Submit a Concern";
     var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
+    var maxEvidenceSizeMb = (int)(ViewBag.MaxEvidenceSizeMb ?? 10);
 }
 
 <div class="mx-auto max-w-3xl space-y-6">
@@ -22,7 +23,7 @@
     </div>
 
     <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl sm:p-8">
-        <form asp-action="Create" method="post" class="space-y-6">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-6">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
 
@@ -48,6 +49,16 @@
                 <label asp-for="Description" class="mb-1.5 block text-sm font-semibold text-gray-800">Description <span class="text-red-500">*</span></label>
                 <textarea asp-for="Description" rows="8" maxlength="5000" class="w-full resize-y rounded-xl border border-white/60 bg-white/60 px-4 py-3 text-sm transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/15" placeholder="Describe the situation in detail. Include dates, people involved, and any relevant information."></textarea>
                 <span asp-validation-for="Description" class="text-xs text-red-600"></span>
+            </div>
+
+            <div class="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
+                <label for="evidenceFiles" class="block text-sm font-semibold text-gray-800">Attach evidence <span class="font-normal text-gray-400">(optional)</span></label>
+                <p class="mt-1 text-xs leading-5 text-gray-500">Add up to 5 images, PDF documents, or plain text files. Maximum @maxEvidenceSizeMb MB per file and 25 MB total.</p>
+                <input id="evidenceFiles" name="evidenceFiles" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,application/pdf,image/png,image/jpeg,image/gif,image/webp,text/plain" class="mt-3 block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 file:shadow-sm hover:file:bg-blue-100" />
+                <span class="mt-1 block text-xs text-red-600">@Html.ValidationMessage("evidenceFiles")</span>
+                <label for="evidenceDescription" class="mt-3 block text-xs font-medium text-gray-700">Evidence note (optional)</label>
+                <input id="evidenceDescription" name="evidenceDescription" maxlength="500" class="mt-1 w-full rounded-xl border border-white bg-white/80 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" placeholder="Briefly describe the attached files" />
+                <span class="mt-1 block text-xs text-red-600">@Html.ValidationMessage("evidenceDescription")</span>
             </div>
 
             <div class="rounded-2xl border border-white/60 bg-white/60 p-4 shadow-sm">

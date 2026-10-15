@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -32,11 +33,13 @@ public static class DbSeeder
 
         // 2. Seed Admin user
         var adminEmail = config["Seed:AdminEmail"] ?? "admin@wb.local";
-        var adminPassword = config["Seed:AdminPassword"] ?? "Admin@12345";
-
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin == null)
         {
+            var adminPassword = config["Seed:AdminPassword"];
+            if (string.IsNullOrWhiteSpace(adminPassword))
+                throw new InvalidOperationException("Set Seed:AdminPassword using User Secrets or an environment variable before creating the initial administrator account.");
+
             admin = new ApplicationUser
             {
                 UserName = adminEmail,
@@ -71,5 +74,20 @@ public static class DbSeeder
             await context.SaveChangesAsync();
             logger.LogInformation("Seeded 4 sample departments");
         }
+
+        foreach (var setting in ApplicationSettingKeys.Defaults)
+        {
+            if (!await context.SystemSettings.AnyAsync(s => s.Key == setting.Key))
+            {
+                context.SystemSettings.Add(new SystemSetting
+                {
+                    Key = setting.Key,
+                    Value = setting.Value,
+                    Description = setting.Description,
+                });
+            }
+        }
+        await context.SaveChangesAsync();
+
     }
 }

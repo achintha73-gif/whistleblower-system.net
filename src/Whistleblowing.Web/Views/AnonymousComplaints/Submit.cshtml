@@ -1,73 +1,171 @@
-﻿@model Whistleblowing.Application.DTOs.SubmitAnonymousComplaintDto
+@model Whistleblowing.Application.DTOs.SubmitAnonymousComplaintDto
 @{
     ViewData["Title"] = "Submit Anonymously";
+    var maxEvidenceSizeMb = (int)(ViewBag.MaxEvidenceSizeMb ?? 10);
+    var recaptchaSiteKey = ViewBag.RecaptchaSiteKey as string;
 }
 
-<div class="min-h-screen py-10 px-4">
-    <div class="mx-auto max-w-2xl">
-        <a href="/Account/Login" class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-            Back to login
+<div class="min-h-[calc(100vh-120px)] bg-gradient-to-br from-blue-50 via-violet-50 to-fuchsia-50 -m-6 px-4 py-8 sm:px-6 sm:py-10">
+    <div class="mx-auto max-w-[540px]">
+        <a asp-controller="AnonymousComplaints" asp-action="Portal" class="mb-5 inline-flex items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-blue-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m15 18-6-6 6-6M9 12h12"/></svg>
+            Back
         </a>
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Submit a Complaint Anonymously</h1>
-            <p class="mt-1 text-sm text-gray-600">Your identity will not be recorded anywhere in the system.</p>
+        <div class="mb-5 flex items-center gap-3">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white shadow-lg shadow-blue-600/30 ring-4 ring-white/70">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3 4.5 6v5.2c0 4.7 3.2 8.7 7.5 9.8 4.3-1.1 7.5-5.1 7.5-9.8V6L12 3Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <div>
+                <div class="mb-1 flex flex-wrap items-center gap-2"><h1 class="text-lg font-bold tracking-tight text-slate-900">Submit a concern anonymously</h1><span class="rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-700">Private report</span></div>
+                <p class="text-[11px] leading-4 text-slate-500">Share your concern securely. A reference code will be provided for follow-up.</p>
+            </div>
         </div>
 
-        <div class="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
-            <form asp-action="Submit" method="post" class="space-y-5">
-                @Html.AntiForgeryToken()
+        <div class="rounded-3xl border border-white/90 bg-white/75 p-4 shadow-[0_24px_70px_-32px_rgba(50,60,120,0.3)] ring-1 ring-indigo-100/50 backdrop-blur-2xl sm:p-5">
+            @if (!(bool)(ViewBag.AnonymousEnabled ?? true))
+            {
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-5"><h2 class="font-semibold text-amber-900">Anonymous submissions are temporarily disabled</h2><p class="mt-2 text-sm text-amber-800">You can still track a concern you previously submitted.</p><a asp-action="Track" class="mt-4 inline-flex rounded-xl bg-amber-700 px-4 py-2 text-sm font-semibold text-white">Track an existing concern</a></div>
+            }
+            else
+            {
+                <form asp-action="Submit" method="post" enctype="multipart/form-data" class="space-y-4">
+                    @Html.AntiForgeryToken()
 
-                <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-4">
-                    <div class="flex items-start gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
-                            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-                        </div>
-                        <div>
-                            <h2 class="text-sm font-semibold text-blue-900">Anonymous Submission</h2>
-                            <p class="mt-1 text-xs text-blue-800">Your identity will not be recorded. After submitting, you will receive a reference code to track your complaint.</p>
+                    <div class="rounded-2xl border border-blue-200/90 bg-gradient-to-r from-blue-50 via-indigo-50/80 to-white px-3.5 py-3 shadow-sm shadow-blue-900/[0.03]">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3 4.5 6v5.2c0 4.7 3.2 8.7 7.5 9.8 4.3-1.1 7.5-5.1 7.5-9.8V6L12 3Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m9 12 2 2 4-4"/></svg></span>
+                            <div><h2 class="text-xs font-semibold text-blue-900">Anonymous Submission</h2><p class="mt-0.5 text-[10px] leading-4 text-blue-800">Your identity will not be recorded. After submitting, you will receive a reference code to track your concern.</p></div>
                         </div>
                     </div>
-                </div>
 
-                <div asp-validation-summary="ModelOnly" class="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700"></div>
+                    <div asp-validation-summary="ModelOnly" class="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700"></div>
 
-                <div>
-                    <label asp-for="Title" class="mb-1.5 block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
-                    <input asp-for="Title" maxlength="200" placeholder="Brief summary of the issue" class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                    <span asp-validation-for="Title" class="mt-1 block text-xs text-red-600"></span>
-                </div>
+                    <div>
+                        <label asp-for="Title" class="mb-1.5 block text-xs font-medium text-slate-700">Title <span class="text-red-500">*</span></label>
+                        <input asp-for="Title" maxlength="200" placeholder="Brief summary of the issue" class="w-full rounded-xl border border-slate-200 bg-white/80 px-3.5 py-3 text-sm text-slate-900 shadow-sm shadow-slate-900/[0.02] placeholder:text-slate-400 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" />
+                        <span asp-validation-for="Title" class="mt-1 block text-[10px] text-red-600"></span>
+                    </div>
 
-                <div>
-                    <label asp-for="Category" class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
-                    <select asp-for="Category" class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                        <option value="">Select a category (optional)</option>
-                        @foreach (var cat in Whistleblowing.Application.DTOs.ComplaintCategories.All)
-                        {
-                            <option value="@cat">@cat</option>
-                        }
-                    </select>
-                </div>
+                    <div>
+                        <label asp-for="Category" class="mb-1.5 block text-xs font-medium text-slate-700">Category</label>
+                        <select asp-for="Category" class="w-full rounded-xl border border-slate-200 bg-white/80 px-3.5 py-3 text-sm text-slate-800 shadow-sm shadow-slate-900/[0.02] outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                            <option value="">Select a category (optional)</option>
+                            @foreach (var category in Whistleblowing.Application.DTOs.ComplaintCategories.All)
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Category" class="mt-1 block text-[10px] text-red-600"></span>
+                    </div>
 
-                <div>
-                    <label asp-for="Description" class="mb-1.5 block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
-                    <textarea asp-for="Description" rows="8" maxlength="5000" placeholder="Provide details about what happened, when, where, and any other relevant information. Avoid including details that could identify you." class="w-full rounded-xl border border-gray-300 bg-white/80 px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
-                    <span asp-validation-for="Description" class="mt-1 block text-xs text-red-600"></span>
-                </div>
+                    <div>
+                        <label asp-for="Description" class="mb-1.5 block text-xs font-medium text-slate-700">Description <span class="text-red-500">*</span></label>
+                        <textarea asp-for="Description" rows="5" maxlength="5000" placeholder="Provide details about what happened, when, where, and any other relevant information. Avoid including details that could identify you." class="w-full resize-y rounded-xl border border-slate-200 bg-white/80 px-3.5 py-3 text-sm leading-5 text-slate-900 shadow-sm shadow-slate-900/[0.02] placeholder:text-slate-400 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"></textarea>
+                        <span asp-validation-for="Description" class="mt-1 block text-[10px] text-red-600"></span>
+                    </div>
 
-                <div class="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5">
-                    <p class="text-xs text-amber-800"><strong>Important:</strong> Save your reference code after submitting. You'll need it to track your complaint status or add additional information later.</p>
-                </div>
+                    <div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/60 p-3.5 shadow-sm shadow-slate-900/[0.025]">
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <label for="evidenceFiles" class="text-xs font-semibold text-slate-800">Attach Evidence <span class="font-normal text-slate-500">(optional)</span></label>
+                            <span class="text-[9px] text-slate-500">Max @maxEvidenceSizeMb MB each · 25 MB total</span>
+                        </div>
+                        <input id="evidenceFiles" name="evidenceFiles" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,application/pdf,image/png,image/jpeg,image/gif,image/webp,text/plain" class="sr-only" aria-describedby="evidenceFileList" />
+                        <div id="evidenceDropZone" class="group flex min-h-24 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white/75 px-3 py-3 text-center transition hover:border-blue-400 hover:bg-blue-50/60 focus:outline-none focus:ring-4 focus:ring-blue-500/10" role="button" tabindex="0" aria-label="Choose or drop evidence files">
+                            <span class="mb-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition group-hover:bg-blue-100"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 16V4m0 0L7 9m5-5 5 5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></span>
+                            <p class="text-[11px] font-medium text-slate-700">Drag and drop files here</p>
+                            <p class="mt-0.5 text-[9px] text-slate-500">or click to browse · PDF, images, TXT · up to 5 files</p>
+                        </div>
+                        <div id="evidenceFileList" class="mt-2 hidden space-y-1"></div>
+                        <span class="mt-1 block text-[10px] text-red-600">@Html.ValidationMessage("evidenceFiles")</span>
+                        <label for="evidenceDescription" class="mt-2 block text-[10px] font-medium text-slate-700">Evidence note (optional)</label>
+                        <input id="evidenceDescription" name="evidenceDescription" maxlength="500" class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10" placeholder="Briefly describe the attached files" />
+                        <span class="mt-1 block text-[10px] text-red-600">@Html.ValidationMessage("evidenceDescription")</span>
+                    </div>
 
-                <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition">
-                    Submit Complaint Anonymously
-                </button>
-            </form>
+                    @if (!string.IsNullOrWhiteSpace(recaptchaSiteKey))
+                    {
+                        <div class="rounded-xl border border-slate-200 bg-slate-50/65 p-3">
+                            <p class="mb-2 text-[11px] font-medium text-slate-700">Verify you are human <span class="text-red-500">*</span></p>
+                            <div class="max-w-full overflow-x-auto"><div class="g-recaptcha" data-sitekey="@recaptchaSiteKey"></div></div>
+                            <span class="mt-1 block text-[10px] text-red-600">@Html.ValidationMessage("g-recaptcha-response")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800" role="alert">Security check is not configured. Please contact the system administrator.</div>
+                    }
+
+                    <div class="rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2.5">
+                        <p class="text-[10px] leading-4 text-amber-800"><strong>Important:</strong> Save your reference code after submitting. You will need it to track your concern or add information later.</p>
+                    </div>
+
+                    <button type="submit" class="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-600/25 focus:outline-none focus:ring-4 focus:ring-blue-500/20">Submit concern anonymously <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                </form>
+            }
         </div>
+
+        <p class="mt-4 text-center text-[10px] text-slate-500">Already submitted? <a asp-action="Track" class="font-medium text-blue-700 hover:text-indigo-700">Track your concern <span aria-hidden="true">→</span></a></p>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (!string.IsNullOrWhiteSpace(recaptchaSiteKey))
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    }
+    <script>
+        (() => {
+            const input = document.getElementById('evidenceFiles');
+            const zone = document.getElementById('evidenceDropZone');
+            const list = document.getElementById('evidenceFileList');
+            if (!input || !zone || !list) return;
+
+            const showFiles = () => {
+                list.replaceChildren();
+                const files = Array.from(input.files || []);
+                list.classList.toggle('hidden', files.length === 0);
+                for (const file of files) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center justify-between gap-2 rounded-md border border-blue-100 bg-white px-2.5 py-1.5 text-[10px] text-slate-700';
+                    const name = document.createElement('span');
+                    name.className = 'truncate';
+                    name.textContent = file.name;
+                    const size = document.createElement('span');
+                    size.className = 'shrink-0 text-slate-400';
+                    size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                    row.append(name, size);
+                    list.append(row);
+                }
+            };
+
+            zone.addEventListener('click', () => input.click());
+            zone.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    input.click();
+                }
+            });
+            input.addEventListener('change', showFiles);
+            for (const eventName of ['dragenter', 'dragover']) {
+                zone.addEventListener(eventName, event => {
+                    event.preventDefault();
+                    zone.classList.add('border-blue-500', 'bg-blue-50');
+                });
+            }
+            for (const eventName of ['dragleave', 'drop']) {
+                zone.addEventListener(eventName, event => {
+                    event.preventDefault();
+                    zone.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+            }
+            zone.addEventListener('drop', event => {
+                const transfer = new DataTransfer();
+                for (const file of Array.from(event.dataTransfer?.files || []).slice(0, 5)) transfer.items.add(file);
+                input.files = transfer.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        })();
+    </script>
 }

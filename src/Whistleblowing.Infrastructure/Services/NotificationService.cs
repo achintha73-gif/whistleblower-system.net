@@ -76,4 +76,16 @@ public class NotificationService : INotificationService
         await _db.SaveChangesAsync(ct);
         return true;
     }
+
+    public async Task<int> MarkAllAsReadAsync(Guid userId, CancellationToken ct = default)
+    {
+        var unread = await _db.Notifications
+            .Where(notification => notification.UserId == userId && !notification.IsRead)
+            .ToListAsync(ct);
+        if (unread.Count == 0) return 0;
+
+        foreach (var notification in unread) notification.IsRead = true;
+        await _db.SaveChangesAsync(ct);
+        return unread.Count;
+    }
 }

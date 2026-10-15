@@ -29,6 +29,7 @@ public class CaseService : ICaseService
             .Include(c => c.Complaint)
             .Include(c => c.AssignedInvestigator)
             .Include(c => c.Investigators)
+            .Include(c => c.InvestigationReport)
             .AsNoTracking()
             .AsQueryable();
 
@@ -50,6 +51,7 @@ public class CaseService : ICaseService
             Status = c.Status,
             Priority = c.Priority,
             AssignedInvestigatorName = c.AssignedInvestigator?.FullName,
+            HasReport = c.InvestigationReport != null,
             CreatedAt = c.CreatedAt,
             UpdatedAt = c.UpdatedAt,
         }).ToList();
@@ -62,11 +64,12 @@ public class CaseService : ICaseService
     public async Task<CaseDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var c = await _db.Cases
-            .Include(x => x.Complaint)
+            .Include(x => x.Complaint).ThenInclude(c => c.AdditionalInfo)
+            .Include(x => x.Complaint).ThenInclude(c => c.Evidence).ThenInclude(e => e.UploadedBy)
             .Include(x => x.AssignedInvestigator)
             .Include(x => x.Investigators)
-            .Include(x => x.Evidence)
-            .Include(x => x.StatusHistory)
+            .Include(x => x.Evidence).ThenInclude(e => e.UploadedBy)
+            .Include(x => x.StatusHistory).ThenInclude(h => h.ChangedBy)
             .Include(x => x.InvestigationReport)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, ct);
@@ -89,10 +92,38 @@ public class CaseService : ICaseService
             AssignedInvestigatorId = c.AssignedInvestigatorId,
             AssignedInvestigatorName = c.AssignedInvestigator?.FullName,
             AssignedInvestigatorEmail = c.AssignedInvestigator?.Email,
-            EvidenceCount = c.Evidence?.Count ?? 0,
+            EvidenceCount = (c.Evidence?.Count ?? 0) + (c.Complaint.Evidence?.Count ?? 0),
             StatusHistoryCount = c.StatusHistory?.Count ?? 0,
             InvestigatorCount = c.Investigators?.Count ?? 0,
             HasReport = c.InvestigationReport != null,
+            ReportFindings = c.InvestigationReport?.Findings,
+            ReportRecommendation = c.InvestigationReport?.Recommendation,
+            Evidence = (c.Evidence ?? new List<Evidence>())
+                .Concat(c.Complaint.Evidence ?? new List<Evidence>())
+                .OrderByDescending(e => e.UploadedAt)
+                .Select(e => new EvidenceItemDto
+                {
+                    Id = e.Id,
+                    FileName = e.FileName,
+                    Description = e.Description,
+                    UploadedAt = e.UploadedAt,
+                    UploadedBy = e.UploadedBy?.FullName,
+                }).ToList(),
+            StatusHistory = c.StatusHistory?.OrderByDescending(h => h.ChangedAt).Select(h => new CaseStatusHistoryItemDto
+            {
+                Status = h.Status,
+                Note = h.Note,
+                ChangedBy = h.ChangedBy?.FullName,
+                ChangedAt = h.ChangedAt,
+            }).ToList() ?? new List<CaseStatusHistoryItemDto>(),
+            AdditionalInformation = c.Complaint.AdditionalInfo?.OrderByDescending(i => i.CreatedAt).Select(i => new AdditionalInformationItemDto
+            {
+                Id = i.Id,
+                Title = i.Title,
+                Description = i.Description,
+                InformationType = i.InformationType.ToString(),
+                SubmittedAt = i.CreatedAt,
+            }).ToList() ?? new List<AdditionalInformationItemDto>(),
         };
     }
 
@@ -127,7 +158,17 @@ public class CaseService : ICaseService
             .FirstOrDefaultAsync(c => c.Id == complaintId, ct);
 
         if (complaint == null) return null;
-        if (complaint.Status != ComplaintStatus.Pending) return null;
+        if (complaint.Status != ComplaintStatus.Pending && complaint.Status != ComplaintStatus.Approved) return null;
+
+        var priorityValue = await _db.SystemSettings
+            .AsNoTracking()
+            .Where(s => s.Key == ApplicationSettingKeys.DefaultCasePriority)
+            .Select(s => s.Value)
+            .FirstOrDefaultAsync(ct);
+        var defaultPriority = Enum.TryParse<CasePriority>(priorityValue, true, out var parsedPriority)
+            && Enum.IsDefined(parsedPriority)
+                ? parsedPriority
+                : CasePriority.Medium;
 
         return new ConvertComplaintDto
         {
@@ -136,7 +177,7 @@ public class CaseService : ICaseService
             ComplaintDescription = complaint.Description,
             ComplaintCategory = complaint.Category,
             ComplaintIsAnonymous = complaint.IsAnonymous,
-            Priority = CasePriority.Medium,
+            Priority = defaultPriority,
         };
     }
 
@@ -148,6 +189,9 @@ public class CaseService : ICaseService
         Guid complaintId, CasePriority priority, Guid currentUserId,
         CancellationToken ct = default)
     {
+        if (!Enum.IsDefined(priority))
+            return new ConvertComplaintResult(false, Errors: new[] { "Choose a valid case priority" });
+
         using var tx = await _db.Database.BeginTransactionAsync(ct);
         try
         {
@@ -157,8 +201,8 @@ public class CaseService : ICaseService
             if (complaint == null)
                 return new ConvertComplaintResult(false, Errors: new[] { "Complaint not found" });
 
-            if (complaint.Status != ComplaintStatus.Pending)
-                return new ConvertComplaintResult(false, Errors: new[] { "Only pending complaints can be converted" });
+            if (complaint.Status != ComplaintStatus.Pending && complaint.Status != ComplaintStatus.Approved)
+                return new ConvertComplaintResult(false, Errors: new[] { "Only pending or approved concerns can be converted" });
 
             var existing = await _db.Cases.AnyAsync(c => c.ComplaintId == complaintId, ct);
             if (existing)
@@ -184,6 +228,14 @@ public class CaseService : ICaseService
                 Note = "Case created from complaint",
                 ChangedById = currentUserId,
                 ChangedAt = DateTime.UtcNow,
+            });
+            _db.ActivityLogs.Add(new ActivityLog
+            {
+                EventType = "CaseCreated",
+                Description = "A pending concern was converted into an investigation case.",
+                EntityType = "Case",
+                EntityId = newCase.Id,
+                ActorId = currentUserId,
             });
             await _db.SaveChangesAsync(ct);
 
@@ -223,7 +275,7 @@ public class CaseService : ICaseService
         // Get all active investigators via UserRoles join
         var investigators = await _db.Users
             .Include(u => u.Department)
-            .Where(u => u.Status == UserStatus.Active &&
+            .Where(u => !u.IsDeleted && u.Status == UserStatus.Active &&
                         _db.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == invRoleId))
             .OrderBy(u => u.FullName)
             .Select(u => new InvestigatorOptionDto
@@ -263,7 +315,7 @@ public class CaseService : ICaseService
                 .FirstOrDefaultAsync(ct);
 
             var validCount = await _db.Users
-                .CountAsync(u => uniqueIds.Contains(u.Id) &&
+                .CountAsync(u => uniqueIds.Contains(u.Id) && !u.IsDeleted &&
                                  u.Status == UserStatus.Active &&
                                  _db.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == invRoleId), ct);
 
@@ -315,6 +367,15 @@ public class CaseService : ICaseService
                     ChangedAt = DateTime.UtcNow,
                 });
             }
+
+            _db.ActivityLogs.Add(new ActivityLog
+            {
+                EventType = "InvestigatorsAssigned",
+                Description = "Investigator assignments were updated for a case.",
+                EntityType = "Case",
+                EntityId = caseRow.Id,
+                ActorId = currentUserId,
+            });
 
             await _db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);

@@ -40,4 +40,15 @@ public class NotificationsController : Controller
         await _notifications.MarkAsReadAsync(id, user.Id);
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkAllRead()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return RedirectToAction("Login", "Account");
+
+        await _notifications.MarkAllAsReadAsync(user.Id);
+        return RedirectToAction(nameof(Index));
+    }
 }

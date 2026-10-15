@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Complaint Details";
     var additionalInfo = ViewData["AdditionalInfo"] as IReadOnlyList<Whistleblowing.Application.Interfaces.AnonymousInfoDto> ?? new List<Whistleblowing.Application.Interfaces.AnonymousInfoDto>();
+    var evidence = ViewData["Evidence"] as IReadOnlyList<Whistleblowing.Application.DTOs.EvidenceItemDto> ?? Array.Empty<Whistleblowing.Application.DTOs.EvidenceItemDto>();
+    var maxEvidenceSizeMb = (int)(ViewData["MaxEvidenceSizeMb"] ?? 10);
 
     string StatusClass(ComplaintStatus s) => s switch
     {
@@ -57,6 +59,31 @@
                     <p class="mt-2 whitespace-pre-wrap text-sm text-gray-800">@Model.Description</p>
                 </div>
             </div>
+
+            <section class="overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-xl shadow-blue-900/5 backdrop-blur-xl">
+                <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                    <div><h2 class="text-base font-semibold text-gray-900">Evidence</h2><p class="mt-0.5 text-xs text-gray-500">@evidence.Count file@(evidence.Count == 1 ? "" : "s") attached</p></div>
+                </div>
+                @if (evidence.Count > 0)
+                {
+                    <ul class="divide-y divide-gray-100">
+                        @foreach (var item in evidence)
+                        {
+                            <li class="flex items-center justify-between gap-3 px-5 py-3"><div class="min-w-0"><p class="truncate text-sm font-medium text-gray-800">@item.FileName</p><p class="mt-0.5 text-xs text-gray-500">@item.Description · @item.UploadedAt.ToString("dd MMM yyyy, HH:mm")</p></div><a asp-action="DownloadEvidence" asp-route-id="@item.Id" asp-route-code="@Model.ReferenceCode" class="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50">Download</a></li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="px-5 py-4 text-sm text-gray-500">No evidence files have been added yet.</p>
+                }
+                <form asp-action="AddEvidence" method="post" enctype="multipart/form-data" class="space-y-3 border-t border-gray-100 bg-gray-50/60 p-5">
+                    @Html.AntiForgeryToken()<input type="hidden" name="referenceCode" value="@Model.ReferenceCode" />
+                    <div><label for="evidenceFiles" class="block text-sm font-medium text-gray-700">Add evidence files</label><p class="mt-0.5 text-xs text-gray-500">Up to 5 images, PDF documents, or plain text files. Maximum @maxEvidenceSizeMb MB per file and 25 MB total.</p><input id="evidenceFiles" name="evidenceFiles" type="file" multiple required accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,application/pdf,image/png,image/jpeg,image/gif,image/webp,text/plain" class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-blue-700 file:shadow-sm" /></div>
+                    <label class="block text-xs font-medium text-gray-700">Note (optional)<input name="description" maxlength="500" class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" placeholder="Briefly describe the files" /></label>
+                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Upload evidence</button>
+                </form>
+            </section>
 
             <div class="rounded-2xl border border-white/60 bg-white/70 shadow-xl shadow-blue-900/5 backdrop-blur-xl overflow-hidden">
                 <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">

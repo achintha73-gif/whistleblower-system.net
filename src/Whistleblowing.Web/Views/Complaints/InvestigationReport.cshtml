@@ -1,0 +1,63 @@
+@model Whistleblowing.Web.Models.Complaints.EmployeeInvestigationReportViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Investigation Report";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Investigation Report - @Model.ConcernTitle</title>
+    <style>
+        :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f3f6fb; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; max-width: 900px; margin: 28px auto 16px; padding: 0 24px; }
+        .back { color: #475569; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .print { border: 0; border-radius: 12px; padding: 12px 18px; background: linear-gradient(110deg,#2563eb,#4f46e5); color: white; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px #4f46e533; }
+        .sheet { max-width: 900px; min-height: 800px; margin: 0 auto 36px; padding: 58px 66px; background: white; border: 1px solid #e5eaf2; border-radius: 22px; box-shadow: 0 20px 55px #1e293b12; }
+        .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 26px; border-bottom: 1px solid #e8edf5; }
+        .mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(135deg,#2563eb,#4f46e5); color: white; font-size: 21px; font-weight: 800; }
+        .brand-name { font-size: 14px; font-weight: 800; letter-spacing: .01em; }
+        .brand-sub { margin-top: 3px; color: #64748b; font-size: 11px; }
+        .eyebrow { margin: 34px 0 8px; color: #4f46e5; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+        h1 { margin: 0; font-size: 30px; line-height: 1.2; letter-spacing: -.035em; }
+        .summary { margin: 10px 0 0; color: #64748b; font-size: 14px; line-height: 1.6; }
+        .status { display: inline-flex; margin-top: 20px; padding: 7px 11px; border: 1px solid #bbf7d0; border-radius: 999px; background: #f0fdf4; color: #166534; font-size: 11px; font-weight: 750; }
+        .section { margin-top: 32px; padding-top: 22px; border-top: 1px solid #e8edf5; break-inside: avoid; }
+        h2 { margin: 0 0 13px; color: #334155; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .content { margin: 0; color: #293548; font-size: 14px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid #e8edf5; color: #94a3b8; font-size: 10px; line-height: 1.6; }
+        @@media (max-width: 640px) { .toolbar { margin-top: 16px; padding: 0 14px; } .sheet { min-height: 0; margin: 0 10px 20px; padding: 32px 24px; border-radius: 16px; } h1 { font-size: 25px; } }
+        @@page { size: A4; margin: 18mm; }
+        @@media print { body { background: white; } .toolbar { display: none !important; } .sheet { max-width: none; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; } .status { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <a class="back" asp-controller="Complaints" asp-action="Detail" asp-route-id="@Model.ComplaintId">← Back to my concern</a>
+        <button class="print" type="button" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <main class="sheet">
+        <div class="brand">
+            <div class="mark">W</div>
+            <div><div class="brand-name">Whistleblowing Management System</div><div class="brand-sub">Investigation outcome</div></div>
+        </div>
+        <p class="eyebrow">Investigation report</p>
+        <h1>@Model.ConcernTitle</h1>
+        <p class="summary">@(string.IsNullOrWhiteSpace(Model.Category) ? "Concern review" : Model.Category) · Completed @Model.CompletedAt.ToLocalTime().ToString("dd MMMM yyyy")</p>
+        <span class="status">@(Model.IsManagerReviewed ? "Manager review complete" : "Submitted for manager review")</span>
+
+        <section class="section">
+            <h2>Findings</h2>
+            <p class="content">@Model.Findings</p>
+        </section>
+        <section class="section">
+            <h2>Recommendation</h2>
+            <p class="content">@Model.Recommendation</p>
+        </section>
+        <div class="footer">This report is provided to the employee who submitted this concern. Please keep it private and store any downloaded copy securely.</div>
+    </main>
+</body>
+</html>

@@ -1,21 +1,168 @@
+@using Whistleblowing.Application.DTOs
+@using Whistleblowing.Domain.Enums
+@model IReadOnlyList<ComplaintDto>
 @{
     ViewData["Title"] = "Manager Dashboard";
+    var concerns = Model;
+    var cases = ViewBag.RecentCases as IReadOnlyList<CaseListItemDto> ?? Array.Empty<CaseListItemDto>();
+    var allActiveCases = ViewBag.ActiveCaseAssignments as IReadOnlyList<CaseListItemDto> ?? Array.Empty<CaseListItemDto>();
+    var notifications = ViewBag.RecentNotifications as IReadOnlyList<NotificationDto> ?? Array.Empty<NotificationDto>();
+    var pending = (int)(ViewBag.PendingConcerns ?? 0);
+    var underReview = (int)(ViewBag.UnderReviewConcerns ?? 0);
+    var activeCases = (int)(ViewBag.ActiveCases ?? 0);
+    var pendingReview = (int)(ViewBag.PendingReviewCases ?? 0);
+    var unassigned = (int)(ViewBag.UnassignedCases ?? 0);
+    var critical = (int)(ViewBag.CriticalCases ?? 0);
+    var unread = (int)(ViewBag.UnreadNotificationCount ?? 0);
+    var workload = allActiveCases
+        .Where(item => item.AssignedInvestigatorName != null && item.Status is not CaseStatus.Closed and not CaseStatus.Archived)
+        .GroupBy(item => item.AssignedInvestigatorName!)
+        .Select(group => new { Name = group.Key, Count = group.Count() })
+        .OrderByDescending(item => item.Count)
+        .Take(4)
+        .ToList();
+
+    string ComplaintBadge(ComplaintStatus status) => status switch
+    {
+        ComplaintStatus.Pending => "border-amber-200 bg-amber-50 text-amber-800",
+        ComplaintStatus.UnderReview => "border-blue-200 bg-blue-50 text-blue-800",
+        ComplaintStatus.Approved => "border-emerald-200 bg-emerald-50 text-emerald-800",
+        ComplaintStatus.Rejected => "border-rose-200 bg-rose-50 text-rose-800",
+        ComplaintStatus.ConvertedToCase => "border-violet-200 bg-violet-50 text-violet-800",
+        _ => "border-gray-200 bg-gray-50 text-gray-700"
+    };
+
+    string CaseBadge(CaseStatus status) => status switch
+    {
+        CaseStatus.Open => "border-sky-200 bg-sky-50 text-sky-800",
+        CaseStatus.Investigating => "border-violet-200 bg-violet-50 text-violet-800",
+        CaseStatus.PendingReview => "border-amber-200 bg-amber-50 text-amber-800",
+        CaseStatus.Closed => "border-emerald-200 bg-emerald-50 text-emerald-800",
+        CaseStatus.Archived => "border-slate-200 bg-slate-50 text-slate-700",
+        _ => "border-gray-200 bg-gray-50 text-gray-700"
+    };
 }
 
-<div class="space-y-6">
+<div class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-        <h1 class="text-2xl font-bold text-gray-900">Good morning, @ViewBag.FullName 👋</h1>
-        <p class="mt-1 text-sm text-gray-600">Review concerns and manage cases.</p>
-    </div>
-        <a asp-controller="Users" asp-action="Index"
-           class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
-            View Team
+            <h1 class="text-2xl font-bold text-gray-900">Good morning, @ViewBag.FullName 👋</h1>
+            <p class="mt-1 text-sm text-gray-600">Review incoming concerns and keep investigations moving.</p>
+            @if (unread > 0)
+            {
+                <a asp-controller="Notifications" asp-action="Index" class="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-blue-700 hover:text-blue-900"><span class="h-2 w-2 rounded-full bg-blue-600"></span>@unread unread notification@(unread == 1 ? "" : "s")</a>
+            }
+        </div>
+        <a asp-controller="Users" asp-action="Index" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition hover:from-blue-700 hover:to-indigo-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Manage team
         </a>
     </div>
 
-    <div class="rounded-2xl border border-white/60 bg-white/60 p-8 text-center shadow-lg backdrop-blur-xl">
-        <h2 class="text-lg font-semibold text-gray-900">Manager Dashboard</h2>
-        <p class="mt-2 text-sm text-gray-600">Feature is under construction.</p>
+    <section aria-label="Management overview" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <a asp-controller="Complaints" asp-action="Index" class="rounded-2xl bg-gradient-to-br from-sky-400 to-sky-500 p-4 text-white shadow-lg shadow-sky-500/25 transition hover:-translate-y-0.5">
+            <div class="text-sm font-medium text-white/95">Pending concerns</div><div class="mt-2 text-2xl font-bold">@pending</div><div class="mt-3 flex justify-between rounded-lg bg-white/20 px-3 py-2 text-xs"><span>Need initial review</span><span class="font-semibold">@pending</span></div>
+        </a>
+        <a asp-controller="Complaints" asp-action="Index" class="rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-500 p-4 text-white shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5">
+            <div class="text-sm font-medium text-white/95">Under review</div><div class="mt-2 text-2xl font-bold">@underReview</div><div class="mt-3 flex justify-between rounded-lg bg-white/20 px-3 py-2 text-xs"><span>Concerns being assessed</span><span class="font-semibold">@underReview</span></div>
+        </a>
+        <a asp-controller="Cases" asp-action="Index" class="rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 p-4 text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5">
+            <div class="text-sm font-medium text-white/95">Active cases</div><div class="mt-2 text-2xl font-bold">@activeCases</div><div class="mt-3 flex justify-between rounded-lg bg-white/20 px-3 py-2 text-xs"><span>Critical priority</span><span class="font-semibold">@critical</span></div>
+        </a>
+        <a asp-controller="Cases" asp-action="Index" class="rounded-2xl bg-gradient-to-br from-violet-400 to-violet-500 p-4 text-white shadow-lg shadow-violet-500/25 transition hover:-translate-y-0.5">
+            <div class="text-sm font-medium text-white/95">Awaiting manager review</div><div class="mt-2 text-2xl font-bold">@pendingReview</div><div class="mt-3 flex justify-between rounded-lg bg-white/20 px-3 py-2 text-xs"><span>Unassigned active cases</span><span class="font-semibold">@unassigned</span></div>
+        </a>
+    </section>
+
+    <section aria-label="Quick actions" class="grid gap-4 sm:grid-cols-3">
+        <a asp-controller="Complaints" asp-action="Index" class="group flex items-start gap-3 rounded-2xl border border-white/60 bg-white/60 p-4 shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a2 2 0 01.707.293l5.414 5.414a2 2 0 01.293.707V19a2 2 0 01-2 2z" /></svg></span>
+            <span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-gray-900 group-hover:text-sky-700">Review concerns</span><span class="mt-0.5 block text-xs text-gray-500">@pending pending for review</span></span>
+        </a>
+        <a asp-controller="Cases" asp-action="Index" class="group flex items-start gap-3 rounded-2xl border border-white/60 bg-white/60 p-4 shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg></span>
+            <span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-gray-900 group-hover:text-violet-700">Manage investigations</span><span class="mt-0.5 block text-xs text-gray-500">Assign teams and review reports</span></span>
+        </a>
+        <a asp-controller="Users" asp-action="Index" class="group flex items-start gap-3 rounded-2xl border border-white/60 bg-white/60 p-4 shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8zm14 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg></span>
+            <span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-gray-900 group-hover:text-emerald-700">Team management</span><span class="mt-0.5 block text-xs text-gray-500">View staff and investigator accounts</span></span>
+        </a>
+    </section>
+
+    <div class="grid gap-4 xl:grid-cols-2">
+        <section class="overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-lg backdrop-blur-xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3"><div><h2 class="font-semibold text-gray-900">Recent concerns</h2><p class="mt-0.5 text-xs text-gray-500">Latest submissions requiring attention</p></div><a asp-controller="Complaints" asp-action="Index" class="text-sm font-medium text-blue-700 hover:text-blue-900">View all</a></div>
+            @if (concerns.Count == 0)
+            {
+                <div class="px-4 py-7 text-center"><div class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-sky-50 text-sky-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a2 2 0 01.707.293l5.414 5.414a2 2 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><p class="mt-2 text-sm font-medium text-gray-900">No concerns have been submitted</p><p class="mt-1 text-xs text-gray-500">New submissions will appear here.</p></div>
+            }
+            else
+            {
+                <div class="divide-y divide-gray-100">
+                    @foreach (var item in concerns)
+                    {
+                        <a asp-controller="Complaints" asp-action="Detail" asp-route-id="@item.Id" class="flex items-center justify-between gap-3 px-4 py-3 transition hover:bg-white/70">
+                            <div class="min-w-0"><p class="truncate text-sm font-medium text-gray-900">@item.Title</p><p class="mt-1 text-xs text-gray-500">@(item.Category ?? "General") · @item.CreatedAt.ToString("MMM dd, yyyy")</p></div><span class="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold @ComplaintBadge(item.Status)">@item.Status</span>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-lg backdrop-blur-xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3"><div><h2 class="font-semibold text-gray-900">Recent cases</h2><p class="mt-0.5 text-xs text-gray-500">Current investigation work</p></div><a asp-controller="Cases" asp-action="Index" class="text-sm font-medium text-blue-700 hover:text-blue-900">View all</a></div>
+            @if (cases.Count == 0)
+            {
+                <div class="px-4 py-7 text-center"><div class="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg></div><p class="mt-2 text-sm font-medium text-gray-900">No investigation cases yet</p><p class="mt-1 text-xs text-gray-500">Approved concerns can be converted into cases.</p></div>
+            }
+            else
+            {
+                <div class="divide-y divide-gray-100">
+                    @foreach (var item in cases)
+                    {
+                        <a asp-controller="Cases" asp-action="Detail" asp-route-id="@item.Id" class="flex items-center justify-between gap-3 px-4 py-3 transition hover:bg-white/70">
+                            <div class="min-w-0"><p class="truncate text-sm font-medium text-gray-900">@item.ComplaintTitle</p><p class="mt-1 truncate text-xs text-gray-500">@(item.AssignedInvestigatorName ?? "Awaiting assignment") · @item.Priority priority</p></div><span class="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold @CaseBadge(item.Status)">@item.Status</span>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+
+    <div class="grid gap-4 xl:grid-cols-2">
+        <section class="rounded-2xl border border-white/60 bg-white/70 p-4 shadow-lg backdrop-blur-xl">
+            <div class="flex items-center justify-between"><div><h2 class="font-semibold text-gray-900">Investigator workload</h2><p class="mt-0.5 text-xs text-gray-500">Active cases by primary investigator</p></div><a asp-controller="Cases" asp-action="Index" class="text-xs font-semibold text-blue-700 hover:text-blue-900">View cases</a></div>
+            @if (workload.Count == 0)
+            {
+                <p class="mt-5 rounded-xl bg-gray-50 px-4 py-5 text-center text-sm text-gray-500">No active cases are assigned to investigators yet.</p>
+            }
+            else
+            {
+                <div class="mt-3 space-y-4">
+                    @foreach (var item in workload)
+                    {
+                        <div><div class="mb-1.5 flex justify-between gap-3 text-xs"><span class="truncate font-medium text-gray-700">@item.Name</span><span class="shrink-0 font-semibold text-gray-900">@item.Count case@(item.Count == 1 ? "" : "s")</span></div><div class="h-2 overflow-hidden rounded-full bg-gray-100"><div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-violet-500" style="width: @(activeCases == 0 ? 0 : Math.Min(100, (int)Math.Round((double)item.Count / activeCases * 100)))%"></div></div></div>
+                    }
+                </div>
+            }
+            <div class="mt-5 grid grid-cols-2 gap-3 border-t border-gray-100 pt-4"><div class="rounded-xl bg-amber-50 p-3"><p class="text-xs text-amber-700">Unassigned active</p><p class="mt-1 text-xl font-bold text-amber-800">@unassigned</p></div><div class="rounded-xl bg-violet-50 p-3"><p class="text-xs text-violet-700">Awaiting review</p><p class="mt-1 text-xl font-bold text-violet-800">@pendingReview</p></div></div>
+        </section>
+
+        <section class="overflow-hidden rounded-2xl border border-white/60 bg-white/70 shadow-lg backdrop-blur-xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3"><div><h2 class="font-semibold text-gray-900">Latest notifications</h2><p class="mt-0.5 text-xs text-gray-500">Updates for your management account</p></div><a asp-controller="Notifications" asp-action="Index" class="text-xs font-semibold text-blue-700 hover:text-blue-900">View all</a></div>
+            @if (notifications.Count == 0)
+            {
+                <p class="px-4 py-8 text-center text-sm text-gray-500">No notifications yet.</p>
+            }
+            else
+            {
+                <ul class="divide-y divide-gray-100">
+                    @foreach (var item in notifications)
+                    {
+                        <li class="flex gap-3 px-4 py-3"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full @(item.IsRead ? "bg-gray-300" : "bg-blue-600")"></span><div class="min-w-0"><p class="text-sm leading-5 @(item.IsRead ? "text-gray-600" : "font-medium text-gray-900")">@item.Message</p><p class="mt-1 text-xs text-gray-400">@item.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</p></div></li>
+                    }
+                </ul>
+            }
+        </section>
     </div>
 </div>

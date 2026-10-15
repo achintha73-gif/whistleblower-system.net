@@ -12,6 +12,8 @@
         ComplaintStatus.ConvertedToCase => "bg-purple-100 text-purple-800 border-purple-200",
         _ => "bg-gray-100 text-gray-800 border-gray-200",
     };
+    var canReview = (bool)(ViewBag.CanReview ?? false);
+    var canConvert = (bool)(ViewBag.CanConvert ?? false);
 }
 
 <div class="mx-auto max-w-3xl space-y-6">
@@ -24,6 +26,29 @@
     {
         <div class="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
             @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">@TempData["Error"]</div>
+    }
+
+    @if (canReview || canConvert)
+    {
+        <div class="flex flex-wrap gap-2 rounded-2xl border border-white/60 bg-white/60 p-4 shadow-lg">
+            @if (canReview && Model.Status == ComplaintStatus.Pending)
+            {
+                <form asp-action="StartReview" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><button class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800" type="submit">Mark under review</button></form>
+            }
+            @if (canReview)
+            {
+                <form asp-action="Approve" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><button class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800" type="submit">Approve concern</button></form>
+                <form asp-action="Reject" method="post" onsubmit="return confirm('Reject this concern?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" /><button class="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800" type="submit">Reject</button></form>
+            }
+            @if (canConvert)
+            {
+                <a asp-controller="Cases" asp-action="Convert" asp-route-complaintId="@Model.Id" class="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white">Create investigation case</a>
+            }
         </div>
     }
 
@@ -75,6 +100,25 @@
         </div>
     </div>
 
+    @if ((bool)(ViewBag.CanViewInvestigationReport ?? false))
+    {
+        <section class="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 to-white/80 p-5 shadow-lg shadow-emerald-900/5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-sm font-semibold text-slate-900">Investigation report is ready</h2>
+                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">@((bool)(ViewBag.ReportManagerReviewed ?? false) ? "Manager review complete" : "Submitted for manager review")</span>
+                    </div>
+                    <p class="mt-1 text-sm text-slate-600">View the investigator’s findings and recommendation. You can also print or save the report as a PDF.</p>
+                </div>
+                <a asp-action="InvestigationReport" asp-route-id="@Model.Id" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-lg">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 11h14M6 21h12a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2zm3-6h6m-6 3h4" /></svg>
+                    View report
+                </a>
+            </div>
+        </section>
+    }
+
     <div class="rounded-2xl border border-white/60 bg-white/60 p-6 shadow-lg backdrop-blur-xl">
         <h2 class="text-sm font-semibold text-gray-700">Attached Evidence (@Model.EvidenceCount)</h2>
         @if (Model.EvidenceCount == 0)
@@ -83,9 +127,18 @@
                 <p class="text-sm text-gray-500">No evidence attached to this concern.</p>
             </div>
         }
-        else
+        @foreach (var evidence in Model.Evidence)
         {
-            <p class="mt-2 text-xs text-gray-500">Evidence upload feature coming soon.</p>
+            <div class="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/70 p-3 text-sm"><div class="min-w-0"><a asp-action="DownloadEvidence" asp-route-id="@evidence.Id" class="truncate font-medium text-blue-700 hover:underline">@evidence.FileName</a><p class="text-xs text-gray-500">@evidence.Description · @evidence.UploadedAt.ToString("MMM dd, yyyy HH:mm")</p></div><a asp-action="DownloadEvidence" asp-route-id="@evidence.Id" class="shrink-0 text-xs font-semibold text-blue-700">Download</a></div>
+        }
+        @if ((bool)(ViewBag.CanUploadEvidence ?? false))
+        {
+            <form asp-action="UploadEvidence" method="post" enctype="multipart/form-data" class="mt-4 grid gap-3 border-t border-white/60 pt-4 sm:grid-cols-2">
+                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" />
+                <label class="text-xs font-medium text-gray-700">Evidence files (up to 5, max @ViewBag.MaxEvidenceSizeMb MB each, 25 MB total)<input type="file" name="evidenceFiles" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,application/pdf,image/png,image/jpeg,image/gif,image/webp,text/plain" multiple required class="mt-1 block w-full text-sm" /></label>
+                <label class="text-xs font-medium text-gray-700">Description (optional)<input name="description" maxlength="500" class="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" /></label>
+                <div class="sm:col-span-2"><button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white">Upload evidence</button></div>
+            </form>
         }
     </div>
 
@@ -97,9 +150,17 @@
                 <p class="text-sm text-gray-500">No additional information submitted.</p>
             </div>
         }
-        else
+        @foreach (var info in Model.AdditionalInformation)
         {
-            <p class="mt-2 text-xs text-gray-500">Additional information feature coming soon.</p>
+            <div class="mt-3 rounded-xl bg-white/70 p-4"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-sm font-semibold text-gray-800">@info.Title</h3><span class="text-xs text-gray-500">@info.InformationType · @info.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</span></div><p class="mt-2 whitespace-pre-wrap text-sm text-gray-700">@info.Description</p></div>
+        }
+        @if ((bool)(ViewBag.CanAddInformation ?? false))
+        {
+            <form asp-action="AddInformation" method="post" class="mt-4 space-y-3 border-t border-white/60 pt-4">
+                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Id" />
+                <div class="grid gap-3 sm:grid-cols-2"><label class="text-xs font-medium text-gray-700">Title<input name="title" required maxlength="200" class="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" /></label><label class="text-xs font-medium text-gray-700">Type<select name="informationType" class="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"><option value="0">Additional details</option><option value="1">Clarification</option><option value="2">Supporting information</option><option value="3">Correction</option></select></label></div>
+                <label class="block text-xs font-medium text-gray-700">Details<textarea name="description" required maxlength="2000" rows="4" class="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"></textarea></label><button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white">Submit information</button>
+            </form>
         }
     </div>
 </div>

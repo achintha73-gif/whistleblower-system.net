@@ -6,7 +6,8 @@
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-UI-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
   <img alt="xUnit" src="https://img.shields.io/badge/xUnit-Tests-5C2D91?style=flat-square" />
 </p>
-# Whistleblowing Management System
+
+## Whistleblowing Management System
 
 A web application for securely reporting, reviewing, investigating, and tracking workplace concerns. Employees can submit concerns while signed in or anonymously. Managers and investigators can review reports, manage cases, handle evidence, and prepare investigation reports.
 

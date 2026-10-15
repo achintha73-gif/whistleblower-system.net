@@ -1,104 +1,104 @@
 # Whistleblowing Management System
 
-සේවා ස්ථානයක ගැටලු සහ අක්‍රමිකතා රහසිගතව වාර්තා කර, සමාලෝචනය කර, විමර්ශනය කිරීමට භාවිත කරන වෙබ් පද්ධතියකි. සේවකයින්ට ගිණුමක් හරහා හෝ අනන්‍යතාව හෙළි නොකර පැමිණිලි ඉදිරිපත් කළ හැක. අදාළ කළමනාකරුවන් සහ විමර්ශකයින්ට පැමිණිලි පාලනය කර වාර්තා සකස් කළ හැක.
+A web application for securely reporting, reviewing, investigating, and tracking workplace concerns. Employees can submit concerns while signed in or anonymously. Managers and investigators can review reports, manage cases, handle evidence, and prepare investigation reports.
 
-## ප්‍රධාන විශේෂාංග
+## Features
 
-- සේවක ගිණුම්, පුරනය වීම, පැතිකඩ සහ අමතක වූ මුරපද නැවත සකස් කිරීම.
-- සේවක සහ අනන්‍ය පැමිණිලි ඉදිරිපත් කිරීම.
-- යොමු කේතයක් භාවිතයෙන් අනන්‍ය පැමිණිල්ලක තත්ත්වය පරීක්ෂා කිරීම සහ අමතර තොරතුරු යැවීම.
-- පැමිණිලි සමාලෝචනය, නඩු විවෘත කිරීම, ප්‍රමුඛතාව නියම කිරීම සහ විමර්ශකයින් පැවරීම.
-- PDF, PNG, JPG/JPEG, GIF, WEBP සහ TXT සාක්ෂි ගොනු යැවීම සහ අවසර ඇති පරිශීලකයින්ට බාගත කිරීම.
-- විමර්ශන වාර්තා සකස් කිරීම සහ කළමනාකරුගේ සමාලෝචනය.
-- සේවකයින්ට වාර්තා කියවීමට, මුද්‍රණය කිරීමට හෝ PDF ලෙස සුරැකීමට හැකි පිටුවක්.
-- පරිශීලක, දෙපාර්තමේන්තු, පද්ධති සැකසුම්, දැනුම්දීම් සහ ක්‍රියාකාරකම් වාර්තා පාලනය.
-- ජංගම සහ පරිගණක තිරවලට ගැළපෙන අතුරුමුහුණත.
-- Google reCAPTCHA සහ අනන්‍ය පැමිණිලි පරීක්ෂාව සඳහා ඉල්ලීම් සීමා කිරීම.
+- Employee registration, sign-in, profile management, and password reset.
+- Signed-in and anonymous concern submission.
+- Reference-code tracking for anonymous concerns, with options to send additional information and evidence.
+- Concern review, case creation, priority management, and investigator assignment.
+- Evidence uploads and downloads for PDF, PNG, JPG/JPEG, GIF, WEBP, and TXT files.
+- Investigation reports with manager review.
+- A report page employees can print or save as PDF from their browser.
+- User and department management, system settings, notifications, and activity logs.
+- Responsive layouts for mobile and desktop.
+- Optional Google reCAPTCHA verification and rate limiting for anonymous tracking requests.
 
-## පරිශීලක භූමිකා
+## User roles
 
-| භූමිකාව | ප්‍රධාන භාවිතය |
+| Role | Main responsibilities |
 | --- | --- |
-| පරිපාලක | පරිශීලකයින්, දෙපාර්තමේන්තු, පද්ධති සැකසුම් සහ ක්‍රියාකාරකම් වාර්තා පාලනය. |
-| කළමනාකරු | පැමිණිලි සමාලෝචනය, නඩු පාලනය, විමර්ශකයින් පැවරීම සහ වාර්තා සමාලෝචනය. |
-| විමර්ශක | තමන්ට පැවරූ නඩු පරීක්ෂා කිරීම, සාක්ෂි කළමනාකරණය සහ වාර්තා යැවීම. |
-| සේවක | පැමිණිලි ඉදිරිපත් කිරීම සහ තම පැමිණිලිවල තත්ත්වය බැලීම. |
-| අනන්‍ය පරිශීලක | ගිණුමක් නොමැතිව වාර්තා කිරීම, යොමු කේතයෙන් තත්ත්වය බැලීම සහ අමතර සාක්ෂි යැවීම. |
+| Administrator | Manage users, departments, system settings, and activity logs. |
+| Manager | Review concerns, manage cases, assign investigators, and review reports. |
+| Investigator | Review assigned cases, manage evidence, and submit investigation reports. |
+| Employee | Submit concerns and view the status of their own submissions. |
+| Anonymous reporter | Submit a concern without an account, track it with a reference code, and provide additional information or evidence. |
 
-## භාවිත කරන තාක්ෂණ
+## Technology
 
-- .NET 10 සහ ASP.NET Core MVC
-- Entity Framework Core 9 සහ Pomelo MySQL provider
-- MySQL 8 හෝ ඊට අනුකූල දත්තගබඩාව
-- ASP.NET Core Identity සහ භූමිකා අනුව අවසර පාලනය
-- Razor Views සහ Tailwind CSS
-- xUnit පරීක්ෂණ ව්‍යාපෘතිය
+- .NET 10 and ASP.NET Core MVC
+- Entity Framework Core 9 and the Pomelo MySQL provider
+- MySQL 8 or a compatible MySQL server
+- ASP.NET Core Identity and role-based authorization
+- Razor Views and Tailwind CSS
+- xUnit test project
 
-## ව්‍යාපෘති ෆෝල්ඩර්
+## Project structure
 
-```text
+~~~text
 src/
-  Whistleblowing.Domain/          මූලික ආයතන, භූමිකා සහ නියත අගයන්
-  Whistleblowing.Application/     DTO සහ යෙදුම් සේවා අතුරුමුහුණත්
-  Whistleblowing.Infrastructure/  දත්තගබඩාව, EF Core migrations සහ සේවා
-  Whistleblowing.Web/             MVC පාලක, පිටු සහ ස්ථිතික ගොනු
+  Whistleblowing.Domain/          Core entities, roles, and constants
+  Whistleblowing.Application/     DTOs and application service interfaces
+  Whistleblowing.Infrastructure/  Database access, EF Core migrations, and services
+  Whistleblowing.Web/             MVC controllers, views, and static assets
 tests/
-  Whistleblowing.UnitTests/       xUnit පරීක්ෂණ
-```
+  Whistleblowing.UnitTests/       xUnit tests
+~~~
 
-## අවශ්‍යතා
+## Requirements
 
 - .NET 10 SDK
-- MySQL 8 හෝ ගැළපෙන MySQL සේවාදායකයක්
-- EF Core CLI (`dotnet-ef`) — දත්තගබඩා migrations ක්‍රියාත්මක කිරීමට
+- MySQL 8 or a compatible MySQL server
+- EF Core CLI (dotnet-ef) to apply database migrations
 
-EF Core CLI ස්ථාපනය කර නොමැති නම්:
+Install the EF Core CLI if it is not already available:
 
-```powershell
+~~~powershell
 dotnet tool install --global dotnet-ef --version 9.*
-```
+~~~
 
-## දේශීයව ක්‍රියාත්මක කිරීම
+## Run locally
 
-පහත විධාන PowerShell එකෙන්, repository එකේ මුල් ෆෝල්ඩරයේ සිට ක්‍රියාත්මක කරන්න.
+Run the following PowerShell commands from the repository root.
 
-### 1. MySQL දත්තගබඩාව සකස් කරන්න
+### 1. Prepare the MySQL database
 
-`whistleblowing_dotnet` නමින් දත්තගබඩාවක් සාදා, යෙදුමට එයට සම්බන්ධ වීමට අවශ්‍ය අවසර ඇති MySQL පරිශීලකයෙකු සකස් කරන්න. පහත උදාහරණයේ දත්තගබඩා තොරතුරු ඔබේ දේශීය සැකසුමට ගැළපෙන ලෙස වෙනස් කරන්න.
+Create a database named **whistleblowing_dotnet** and a MySQL user with permission to access it. Use your own local database name, username, and password in the connection string below.
 
-### 2. රහස් අගයන් දේශීයව සුරකින්න
+### 2. Store local secrets
 
-දත්තගබඩා සම්බන්ධතාව සහ පළමු පරිපාලක මුරපදය .NET User Secrets තුළ තබන්න. සැබෑ මුරපද source code හෝ `appsettings.json` තුළ නොතබන්න.
+Save the database connection string and initial administrator credentials with .NET User Secrets. Do not put real passwords in source code or appsettings.json.
 
-```powershell
+~~~powershell
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Port=3306;Database=whistleblowing_dotnet;User=whistleblowing_user;Password=YOUR_LOCAL_DB_PASSWORD;CharSet=utf8mb4" --project src/Whistleblowing.Web
 dotnet user-secrets set "Seed:AdminEmail" "admin@wb.local" --project src/Whistleblowing.Web
 dotnet user-secrets set "Seed:AdminPassword" "YOUR_STRONG_ADMIN_PASSWORD" --project src/Whistleblowing.Web
-```
+~~~
 
-පළමු පරිපාලක ගිණුම සෑදීමට Seed:AdminPassword අගය අවශ්‍යයි. එම ඊමේල් ලිපිනයෙන් පරිපාලක ගිණුමක් දැනටමත් තිබේ නම් එය නැවත සාදන්නේ නැහැ.
+The initial administrator password is required only when the administrator account is first created. If an administrator with that email already exists in the database, the seeder does not create another one.
 
-### 3. දත්තගබඩා වගු සකස් කරන්න
+### 3. Apply database migrations
 
-```powershell
+~~~powershell
 dotnet ef database update --project src/Whistleblowing.Infrastructure --startup-project src/Whistleblowing.Web
-```
+~~~
 
-### 4. වෙබ් යෙදුම ධාවනය කරන්න
+### 4. Start the web application
 
-```powershell
+~~~powershell
 dotnet run --project src/Whistleblowing.Web
-```
+~~~
 
-පර්යන්තයේ පෙන්වන දේශීය ලිපිනය බ්‍රවුසරයෙන් විවෘත කරන්න. පළමු වරට ධාවනය වන විට පද්ධතිය භූමිකා, පරිපාලක ගිණුම, නියැදි දෙපාර්තමේන්තු සහ පෙරනිමි සැකසුම් සකස් කරයි.
+Open the local URL shown in the terminal. On first startup, the application creates the built-in roles, initial administrator, sample departments, and default settings.
 
-## අමතර සේවා සැකසුම්
+## Optional service configuration
 
-### මුරපද නැවත සකස් කිරීමේ ඊමේල්
+### Password reset emails
 
-SMTP සේවාවෙන් ලබාගත් තොරතුරු User Secrets තුළ සකසන්න:
+Configure these values with details provided by your SMTP service:
 
-```powershell
+~~~powershell
 dotnet user-secrets set "Email:Smtp:Host" "smtp.example.com" --project src/Whistleblowing.Web
 dotnet user-secrets set "Email:Smtp:Port" "587" --project src/Whistleblowing.Web
 dotnet user-secrets set "Email:Smtp:EnableSsl" "true" --project src/Whistleblowing.Web
@@ -106,32 +106,34 @@ dotnet user-secrets set "Email:Smtp:Username" "YOUR_SMTP_USERNAME" --project src
 dotnet user-secrets set "Email:Smtp:Password" "YOUR_SMTP_PASSWORD" --project src/Whistleblowing.Web
 dotnet user-secrets set "Email:FromAddress" "noreply@example.com" --project src/Whistleblowing.Web
 dotnet user-secrets set "Email:FromName" "Whistleblowing System" --project src/Whistleblowing.Web
-```
+~~~
 
-### අනන්‍ය පැමිණිලි සඳහා Google reCAPTCHA
+Without SMTP settings, password reset emails cannot be delivered.
 
-Google reCAPTCHA පාලක පැනලයෙන් ලැබෙන අඩවි යතුර සහ රහස් යතුර සකසන්න. ඔබේ පරිගණකයේ පරීක්ෂා කරන විට localhost ලිපිනයට අවසර දී ඇති බව තහවුරු කරන්න.
+### Google reCAPTCHA for anonymous submissions
 
-```powershell
+Configure the site key and secret key from your Google reCAPTCHA project. When testing locally, allow **localhost** in the reCAPTCHA domain settings.
+
+~~~powershell
 dotnet user-secrets set "GoogleReCaptcha:SiteKey" "YOUR_RECAPTCHA_SITE_KEY" --project src/Whistleblowing.Web
 dotnet user-secrets set "GoogleReCaptcha:SecretKey" "YOUR_RECAPTCHA_SECRET_KEY" --project src/Whistleblowing.Web
-```
+~~~
 
-SMTP සැකසුම් නැතිනම් මුරපද නැවත සකස් කිරීමේ ඊමේල් යැවිය නොහැක. reCAPTCHA යතුරු සකසා ඇති විට පමණක් එම තහවුරු කිරීම සක්‍රිය වේ.
+reCAPTCHA verification is available when these keys are configured.
 
-## Build болон тест
+## Build and test
 
-```powershell
+~~~powershell
 dotnet build Whistleblowing.slnx
 dotnet test Whistleblowing.slnx
-```
+~~~
 
-## දත්ත සහ ආරක්ෂාව
+## Data and security notes
 
-- දත්තගබඩාව, SMTP, reCAPTCHA සහ පරිපාලක මුරපද source code තුළ නොතබන්න. .NET User Secrets හෝ ආරක්ෂිත පරිසර සැකසුම් භාවිත කරන්න.
-- සාක්ෂි ගොනු src/Whistleblowing.Web/App_Data/Evidence ෆෝල්ඩරයේ ගබඩා වේ. එය GitHub වෙත යවන්නේ නැහැ. සැබෑ භාවිතයේදී මෙම ගොනු වෙනම උපස්ථ කර, ඒවාට පිවිසීම සීමා කරන්න.
-- යවන ගොනුවල වර්ගය සහ ප්‍රමාණය පද්ධතිය පරීක්ෂා කරයි. සැබෑ සේවාදායකයක යෙදවීමට පෙර HTTPS, උපස්ථ, SMTP, reCAPTCHA සහ සේවාදායක ආරක්ෂාව සකසන්න.
+- Do not store database, SMTP, reCAPTCHA, or administrator passwords in source code. Use .NET User Secrets or protected environment configuration.
+- Evidence files are stored in **src/Whistleblowing.Web/App_Data/Evidence**. This folder is excluded from Git. Back it up separately and restrict access in a production deployment.
+- The application checks evidence file types and sizes. Before deploying to production, configure HTTPS, backups, SMTP, reCAPTCHA, and server-level security.
 
-## සහාය
+## Support
 
-පද්ධතියේ **Support** පිටුවෙන් සකසා ඇති සහාය ඊමේල් ලිපිනය සහ දුරකථන අංකය බැලිය හැක.
+The **Support** page in the application displays the configured support email address and phone number.

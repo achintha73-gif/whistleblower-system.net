@@ -112,9 +112,9 @@ Open the local URL shown in the terminal. On first startup, the application crea
 
 ## Optional service configuration
 
-### Password reset emails
+### Email notifications
 
-Configure these values with details provided by your SMTP service:
+The SMTP sender delivers password-reset emails, investigator assignment notices, and manager notices when an investigation report is submitted for review. Configure these values with details provided by your SMTP service:
 
 ~~~powershell
 dotnet user-secrets set "Email:Smtp:Host" "smtp.example.com" --project src/Whistleblowing.Web
@@ -126,7 +126,7 @@ dotnet user-secrets set "Email:FromAddress" "noreply@example.com" --project src/
 dotnet user-secrets set "Email:FromName" "Whistleblowing System" --project src/Whistleblowing.Web
 ~~~
 
-Without SMTP settings, password reset emails cannot be delivered.
+Without SMTP settings, these emails cannot be delivered; the case workflow still completes and the failed delivery is written to the application log.
 
 ### Google reCAPTCHA for anonymous submissions
 

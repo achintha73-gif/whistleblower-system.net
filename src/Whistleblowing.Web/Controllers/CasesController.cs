@@ -9,6 +9,7 @@ using Whistleblowing.Application.Interfaces;
 using Whistleblowing.Domain.Entities;
 using Whistleblowing.Domain.Enums;
 using Whistleblowing.Infrastructure.Data;
+using Whistleblowing.Web.Services;
 
 namespace Whistleblowing.Web.Controllers;
 
@@ -20,14 +21,16 @@ public class CasesController : Controller
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _environment;
     private readonly INotificationService _notifications;
+    private readonly IAccountEmailSender _emailSender;
 
-    public CasesController(ICaseService cases, UserManager<ApplicationUser> userManager, AppDbContext context, IWebHostEnvironment environment, INotificationService notifications)
+    public CasesController(ICaseService cases, UserManager<ApplicationUser> userManager, AppDbContext context, IWebHostEnvironment environment, INotificationService notifications, IAccountEmailSender emailSender)
     {
         _cases = cases;
         _userManager = userManager;
         _context = context;
         _environment = environment;
         _notifications = notifications;
+        _emailSender = emailSender;
     }
 
     public async Task<IActionResult> Index()
@@ -196,7 +199,7 @@ public class CasesController : Controller
         if (user == null) return RedirectToAction("Login", "Account");
         var role = await GetPrimaryRoleAsync(user);
         if (role != RoleNames.Investigator || !await _cases.CanAccessAsync(id, user.Id, role)) return Forbid();
-        var caseRow = await _context.Cases.Include(c => c.InvestigationReport).FirstOrDefaultAsync(c => c.Id == id);
+        var caseRow = await _context.Cases.Include(c => c.InvestigationReport).Include(c => c.Complaint).FirstOrDefaultAsync(c => c.Id == id);
         if (caseRow == null) return NotFound();
         if (caseRow.Status != CaseStatus.Investigating || caseRow.InvestigationReport == null)
         {
@@ -207,6 +210,14 @@ public class CasesController : Controller
         _context.CaseStatusHistories.Add(new CaseStatusHistory { CaseId = id, Status = CaseStatus.PendingReview, Note = "Investigator submitted the case for review.", ChangedById = user.Id });
         _context.ActivityLogs.Add(new ActivityLog { EventType = "CaseSubmittedForReview", Description = "A case was submitted for manager review.", EntityType = "Case", EntityId = id, ActorId = user.Id });
         await _context.SaveChangesAsync();
+        var managerIds = await _userManager.GetUsersInRoleAsync(RoleNames.Manager);
+        var managers = managerIds.Where(manager => !manager.IsDeleted && manager.Status == UserStatus.Active && !string.IsNullOrWhiteSpace(manager.Email));
+        var caseUrl = Url.Action(nameof(Detail), "Cases", new { id }, Request.Scheme);
+        if (!string.IsNullOrWhiteSpace(caseUrl))
+        {
+            foreach (var manager in managers)
+                await _emailSender.SendReportSubmittedAsync(manager.Email!, manager.FullName, caseRow.Complaint.Title, caseUrl, HttpContext.RequestAborted);
+        }
         TempData["Success"] = "Case submitted for manager review.";
         return RedirectToAction(nameof(Detail), new { id });
     }
@@ -327,6 +338,21 @@ public class CasesController : Controller
         {
             TempData["Error"] = string.Join(", ", result.Errors ?? new[] { "Assignment failed" });
             return RedirectToAction(nameof(Assign), new { id = caseId });
+        }
+
+        if (result.Added?.Count > 0)
+        {
+            var caseDetails = await _cases.GetByIdAsync(caseId);
+            var caseUrl = Url.Action(nameof(Detail), "Cases", new { id = caseId }, Request.Scheme);
+            if (caseDetails != null && !string.IsNullOrWhiteSpace(caseUrl))
+            {
+                foreach (var investigatorId in result.Added)
+                {
+                    var investigator = await _userManager.FindByIdAsync(investigatorId.ToString());
+                    if (investigator is { IsDeleted: false, Status: UserStatus.Active } && !string.IsNullOrWhiteSpace(investigator.Email))
+                        await _emailSender.SendCaseAssignedAsync(investigator.Email, investigator.FullName, caseDetails.ComplaintTitle, caseUrl, HttpContext.RequestAborted);
+                }
+            }
         }
 
         TempData["Success"] = "Investigators updated successfully";

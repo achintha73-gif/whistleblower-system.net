@@ -1,3 +1,11 @@
+<p>
+  <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="C Sharp" src="https://img.shields.io/badge/C%23-ASP.NET%20Core-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="MySQL 8" src="https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql&logoColor=white" />
+  <img alt="Entity Framework Core 9" src="https://img.shields.io/badge/Entity%20Framework-Core%209-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-UI-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
+  <img alt="xUnit" src="https://img.shields.io/badge/xUnit-Tests-5C2D91?style=flat-square" />
+</p>
 # Whistleblowing Management System
 
 A web application for securely reporting, reviewing, investigating, and tracking workplace concerns. Employees can submit concerns while signed in or anonymously. Managers and investigators can review reports, manage cases, handle evidence, and prepare investigation reports.
@@ -26,15 +34,6 @@ A web application for securely reporting, reviewing, investigating, and tracking
 | Anonymous reporter | Submit a concern without an account, track it with a reference code, and provide additional information or evidence. |
 
 ## Tech Stack
-
-<p>
-  <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
-  <img alt="C Sharp" src="https://img.shields.io/badge/C%23-ASP.NET%20Core-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
-  <img alt="MySQL 8" src="https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql&logoColor=white" />
-  <img alt="Entity Framework Core 9" src="https://img.shields.io/badge/Entity%20Framework-Core%209-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
-  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-UI-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-  <img alt="xUnit" src="https://img.shields.io/badge/xUnit-Tests-5C2D91?style=flat-square" />
-</p>
 
 - **Web framework:** ASP.NET Core MVC with Razor Views
 - **Authentication:** ASP.NET Core Identity with role-based authorization

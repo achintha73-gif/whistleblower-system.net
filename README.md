@@ -42,6 +42,16 @@ A web application for securely reporting, reviewing, investigating, and tracking
 - **Styling:** Tailwind CSS
 - **Testing:** xUnit
 
+## Repository languages
+
+The following language breakdown matches the repository language panel shown in the supplied screenshot:
+
+![HTML 50.8%](https://img.shields.io/badge/HTML-50.8%25-e34c26?style=flat-square)
+![C Sharp 48.8%](https://img.shields.io/badge/C%23-48.8%25-7b5cd6?style=flat-square)
+![Other 0.4%](https://img.shields.io/badge/Other-0.4%25-9ca3af?style=flat-square)
+
+GitHub also calculates the language bar on the repository page automatically. These README badges show the values from the screenshot and should be refreshed if the repository's source files change.
+
 ## Project structure
 
 ~~~text

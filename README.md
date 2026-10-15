@@ -25,14 +25,22 @@ A web application for securely reporting, reviewing, investigating, and tracking
 | Employee | Submit concerns and view the status of their own submissions. |
 | Anonymous reporter | Submit a concern without an account, track it with a reference code, and provide additional information or evidence. |
 
-## Technology
+## Tech Stack
 
-- .NET 10 and ASP.NET Core MVC
-- Entity Framework Core 9 and the Pomelo MySQL provider
-- MySQL 8 or a compatible MySQL server
-- ASP.NET Core Identity and role-based authorization
-- Razor Views and Tailwind CSS
-- xUnit test project
+<p>
+  <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="C Sharp" src="https://img.shields.io/badge/C%23-ASP.NET%20Core-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="MySQL 8" src="https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square&logo=mysql&logoColor=white" />
+  <img alt="Entity Framework Core 9" src="https://img.shields.io/badge/Entity%20Framework-Core%209-512BD4?style=flat-square&logo=dotnet&logoColor=white" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-UI-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
+  <img alt="xUnit" src="https://img.shields.io/badge/xUnit-Tests-5C2D91?style=flat-square" />
+</p>
+
+- **Web framework:** ASP.NET Core MVC with Razor Views
+- **Authentication:** ASP.NET Core Identity with role-based authorization
+- **Data access:** Entity Framework Core 9 with the Pomelo MySQL provider
+- **Styling:** Tailwind CSS
+- **Testing:** xUnit
 
 ## Project structure
 
